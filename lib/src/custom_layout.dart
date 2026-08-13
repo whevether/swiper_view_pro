@@ -301,9 +301,9 @@ class ScaleTransformBuilder extends TransformBuilder<double> {
   final Alignment alignment;
 
   ScaleTransformBuilder({
-    required List<double> values,
+    required super.values,
     this.alignment = Alignment.center,
-  }) : super(values: values);
+  });
 
   @override
   Widget build(int i, double animationValue, Widget widget) {
@@ -313,8 +313,7 @@ class ScaleTransformBuilder extends TransformBuilder<double> {
 }
 
 class OpacityTransformBuilder extends TransformBuilder<double> {
-  OpacityTransformBuilder({required List<double> values})
-      : super(values: values);
+  OpacityTransformBuilder({required super.values});
 
   @override
   Widget build(int i, double animationValue, Widget widget) {
@@ -327,8 +326,7 @@ class OpacityTransformBuilder extends TransformBuilder<double> {
 }
 
 class RotateTransformBuilder extends TransformBuilder<double> {
-  RotateTransformBuilder({required List<double> values})
-      : super(values: values);
+  RotateTransformBuilder({required super.values});
 
   @override
   Widget build(int i, double animationValue, Widget widget) {
@@ -341,8 +339,7 @@ class RotateTransformBuilder extends TransformBuilder<double> {
 }
 
 class TranslateTransformBuilder extends TransformBuilder<Offset> {
-  TranslateTransformBuilder({required List<Offset> values})
-      : super(values: values);
+  TranslateTransformBuilder({required super.values});
 
   @override
   Widget build(int i, double animationValue, Widget widget) {
@@ -383,31 +380,18 @@ class _CustomLayoutSwiper extends _SubSwiper {
 
   const _CustomLayoutSwiper({
     required this.option,
-    double? itemWidth,
-    required bool loop,
-    double? itemHeight,
-    ValueChanged<int>? onIndexChanged,
-    Key? key,
-    IndexedWidgetBuilder? itemBuilder,
-    required Curve curve,
-    int? duration,
-    int? index,
-    required int itemCount,
-    Axis? scrollDirection,
-    required SwiperController controller,
-  }) : super(
-            loop: loop,
-            onIndexChanged: onIndexChanged,
-            itemWidth: itemWidth,
-            itemHeight: itemHeight,
-            key: key,
-            itemBuilder: itemBuilder,
-            curve: curve,
-            duration: duration,
-            index: index,
-            itemCount: itemCount,
-            controller: controller,
-            scrollDirection: scrollDirection);
+    super.itemWidth,
+    required super.loop,
+    super.itemHeight,
+    super.onIndexChanged,
+    super.itemBuilder,
+    required super.curve,
+    super.duration,
+    super.index,
+    required super.itemCount,
+    super.scrollDirection,
+    required super.controller,
+  });
 
   @override
   State<StatefulWidget> createState() {

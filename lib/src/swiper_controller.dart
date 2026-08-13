@@ -3,24 +3,24 @@ import 'package:swiper_view_pro/swiper_view_pro.dart';
 class SwipeIndexControllerEvent extends IndexControllerEventBase {
   SwipeIndexControllerEvent({
     required this.pos,
-    required bool animation,
-  }) : super(animation: animation);
+    required super.animation,
+  });
   final double pos;
 }
 
 class BuildIndexControllerEvent extends IndexControllerEventBase {
   BuildIndexControllerEvent({
-    required bool animation,
+    required super.animation,
     required this.config,
-  }) : super(animation: animation);
+  });
   final SwiperPluginConfig config;
 }
 
 class AutoPlaySwiperControllerEvent extends IndexControllerEventBase {
   AutoPlaySwiperControllerEvent({
-    required bool animation,
+    required super.animation,
     required this.autoplay,
-  }) : super(animation: animation);
+  });
 
   AutoPlaySwiperControllerEvent.start({
     required bool animation,

@@ -51,10 +51,8 @@ mixin StepBasedIndexControllerEvent on TargetedPositionControllerEvent {
 class NextIndexControllerEvent extends IndexControllerEventBase
     with TargetedPositionControllerEvent, StepBasedIndexControllerEvent {
   NextIndexControllerEvent({
-    required bool animation,
-  }) : super(
-          animation: animation,
-        );
+    required super.animation,
+  });
 
   @override
   int get step => 1;
@@ -66,10 +64,8 @@ class NextIndexControllerEvent extends IndexControllerEventBase
 class PrevIndexControllerEvent extends IndexControllerEventBase
     with TargetedPositionControllerEvent, StepBasedIndexControllerEvent {
   PrevIndexControllerEvent({
-    required bool animation,
-  }) : super(
-          animation: animation,
-        );
+    required super.animation,
+  });
   @override
   int get step => -1;
 
@@ -84,10 +80,8 @@ class MoveIndexControllerEvent extends IndexControllerEventBase
   MoveIndexControllerEvent({
     required this.newIndex,
     required this.oldIndex,
-    required bool animation,
-  }) : super(
-          animation: animation,
-        );
+    required super.animation,
+  });
   @override
   double get targetPosition => newIndex > oldIndex ? 1 : 0;
 }

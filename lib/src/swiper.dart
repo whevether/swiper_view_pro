@@ -461,11 +461,6 @@ class _SwiperState extends _SwiperTimerMixin {
     return widget.layout == SwiperLayout.DEFAULT;
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
   bool _getReverse(Swiper widget) =>
       widget.resolvedTransformer?.reverse ?? false;
 
@@ -725,7 +720,6 @@ abstract class _SubSwiper extends StatefulWidget {
   final AxisDirection? axisDirection;
 
   const _SubSwiper({
-    Key? key,
     required this.loop,
     this.itemHeight,
     this.itemWidth,
@@ -738,7 +732,7 @@ abstract class _SubSwiper extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.axisDirection = AxisDirection.left,
     this.onIndexChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState();
@@ -755,32 +749,18 @@ abstract class _SubSwiper extends StatefulWidget {
 
 class _TinderSwiper extends _SubSwiper {
   const _TinderSwiper({
-    Key? key,
-    required Curve curve,
-    int? duration,
-    required SwiperController controller,
-    ValueChanged<int>? onIndexChanged,
-    double? itemHeight,
-    double? itemWidth,
-    IndexedWidgetBuilder? itemBuilder,
-    int? index,
-    required bool loop,
-    required int itemCount,
-    Axis? scrollDirection,
-  })  : assert(itemWidth != null && itemHeight != null),
-        super(
-            loop: loop,
-            key: key,
-            itemWidth: itemWidth,
-            itemHeight: itemHeight,
-            itemBuilder: itemBuilder,
-            curve: curve,
-            duration: duration,
-            controller: controller,
-            index: index,
-            onIndexChanged: onIndexChanged,
-            itemCount: itemCount,
-            scrollDirection: scrollDirection);
+    required super.curve,
+    super.duration,
+    required super.controller,
+    super.onIndexChanged,
+    super.itemHeight,
+    super.itemWidth,
+    super.itemBuilder,
+    super.index,
+    required super.loop,
+    required super.itemCount,
+    super.scrollDirection,
+  }) : assert(itemWidth != null && itemHeight != null);
 
   @override
   State<StatefulWidget> createState() {
@@ -790,34 +770,19 @@ class _TinderSwiper extends _SubSwiper {
 
 class _StackSwiper extends _SubSwiper {
   const _StackSwiper({
-    Key? key,
-    required Curve curve,
-    int? duration,
-    required SwiperController controller,
-    ValueChanged<int>? onIndexChanged,
-    double? itemHeight,
-    double? itemWidth,
-    IndexedWidgetBuilder? itemBuilder,
-    int? index,
-    required bool loop,
-    required int itemCount,
-    Axis? scrollDirection,
-    AxisDirection? axisDirection,
-  }) : super(
-          loop: loop,
-          key: key,
-          itemWidth: itemWidth,
-          itemHeight: itemHeight,
-          itemBuilder: itemBuilder,
-          curve: curve,
-          duration: duration,
-          controller: controller,
-          index: index,
-          onIndexChanged: onIndexChanged,
-          itemCount: itemCount,
-          scrollDirection: scrollDirection,
-          axisDirection: axisDirection,
-        );
+    required super.curve,
+    super.duration,
+    required super.controller,
+    super.onIndexChanged,
+    super.itemHeight,
+    super.itemWidth,
+    super.itemBuilder,
+    super.index,
+    required super.loop,
+    required super.itemCount,
+    super.scrollDirection,
+    super.axisDirection,
+  });
 
   @override
   State<StatefulWidget> createState() => _StackViewState();
@@ -832,11 +797,6 @@ class _TinderState extends _CustomLayoutStateBase<_TinderSwiper> {
 
   double getOffsetY(double scale) {
     return widget.itemHeight! - widget.itemHeight! * scale;
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
   }
 
   @override
@@ -920,10 +880,6 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSwiper> {
   late List<double> scales;
   late List<double> offsets;
   late List<double> opacity;
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
 
   void _updateValues() {
     if (widget.scrollDirection == Axis.horizontal) {

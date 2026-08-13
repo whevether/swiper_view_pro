@@ -30,7 +30,9 @@ void main() {
       expect(find.byWidgetPredicate((Widget widget) {
         if (widget.key != null &&
             widget.key is ValueKey &&
-            (widget.key as ValueKey).value == 'pagination_$i') return true;
+            (widget.key as ValueKey).value == 'pagination_$i') {
+          return true;
+        }
 
         return false;
       }), findsOneWidget);
@@ -66,7 +68,9 @@ void main() {
       expect(find.byWidgetPredicate((Widget widget) {
         if (widget.key != null &&
             widget.key is ValueKey &&
-            (widget.key as ValueKey).value == 'pagination_$i') return true;
+            (widget.key as ValueKey).value == 'pagination_$i') {
+          return true;
+        }
 
         return false;
       }), findsOneWidget);
