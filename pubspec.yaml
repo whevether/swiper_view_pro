@@ -1,12 +1,11 @@
-name: flutter_swiper_view
-description: The best swiper(carousel) for flutter, with multiple layouts, infinite loop. Compatible with Android & iOS.
-version: 1.0.0
+name: swiper_view_pro
+description: A Flutter swiper/carousel with multiple layouts, infinite loop, and configurable 3D effects. Compatible with Android and iOS.
+version: 0.1.0
 homepage: https://github.com/whevether/flutter_swiper_view
 
 dependencies:
   flutter:
     sdk: flutter
-
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

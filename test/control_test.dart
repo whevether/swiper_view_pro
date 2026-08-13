@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_swiper_view/flutter_swiper_view.dart';
+import 'package:swiper_view_pro/swiper_view_pro.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -21,17 +21,7 @@ void main() {
     ));
 
     expect(find.byKey(key), findsOneWidget);
-
-    bool first = true;
-
-    await tester.tap(find.byWidgetPredicate((Widget widget) {
-      if (widget is GestureDetector && first) {
-        first = false;
-        return true;
-      }
-
-      return false;
-    }));
+    await tester.tap(find.byIcon(Icons.arrow_back_ios));
   });
 
   testWidgets('Control vertical', (WidgetTester tester) async {
@@ -54,16 +44,6 @@ void main() {
     ));
 
     expect(find.byKey(key), findsOneWidget);
-
-    bool first = true;
-
-    await tester.tap(find.byWidgetPredicate((Widget widget) {
-      if (widget is GestureDetector && first) {
-        first = false;
-        return true;
-      }
-
-      return false;
-    }));
+    await tester.tap(find.byIcon(Icons.arrow_back_ios));
   });
 }

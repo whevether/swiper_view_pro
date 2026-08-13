@@ -10,8 +10,8 @@
     <a href="https://github.com/whevether/flutter_swiper_view/pulls">
         <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg" alt="PRs Welcome" />
     </a>
-    <a href="https://pub.dartlang.org/packages/flutter_swiper">
-        <img src="https://img.shields.io/pub/v/flutter_swiper_view.svg" alt="pub package" />
+    <a href="https://pub.dev/packages/swiper_view_pro">
+        <img src="https://img.shields.io/pub/v/swiper_view_pro.svg" alt="pub package" />
     </a>
 </p>
 <p align="center">
@@ -22,9 +22,9 @@
 
 
 
-# flutter_swiper_view
+# swiper_view_pro
 
-The best swiper for flutter , with multiple layouts, infinite loop. Compatible with Android & iOS.
+A Flutter swiper/carousel with multiple layouts, infinite loop, and configurable 3D effects. Compatible with Android and iOS.
 
 
 
@@ -79,6 +79,7 @@ Thanks to @FlutterRocks ,you've done great job 👏.
   + [Control buttons](#control-buttons)
   + [Controller](#controller)
   + [Autoplay](#autoplay)
+- [3D effects](#3d-effects)
 - [Build in layouts](#build-in-layouts)
 - [Codes](#codes)
 
@@ -88,7 +89,7 @@ Add
 
 ```dart
 dependencies:
-  flutter_swiper_view: ^1.1.8
+  swiper_view_pro: ^0.1.0
 ```
 to your pubspec.yaml ,and run 
 
@@ -110,7 +111,7 @@ Edit lib/main.dart like this:
 ```dart
 import 'package:flutter/material.dart';
 
-import 'package:flutter_swiper_view/flutter_swiper_view.dart';
+import 'package:swiper_view_pro/swiper_view_pro.dart';
 
 void main() => runApp(const MyApp());
 
@@ -177,6 +178,9 @@ class _MyHomePageState extends State<MyHomePage> {
 | duration | 300.0  | The milliscends of every transaction animation costs  |
 | pagination | null | set `SwiperPagination()` to show default pagination
 | control | null | set `SwiperControl()` to show default control buttons
+| enable3D | false | 3D effect switch. Only applies to `SwiperLayout.DEFAULT` when `transformer` is null. |
+| threeDStyle | Swiper3DStyle.cube | 3D style when `enable3D` is true: `cube`, `threeD`, `flip`, `coverflow`. |
+| perspective | 0.001 | Perspective strength for 3D transforms. |
 
 
 #### Pagination
@@ -240,6 +244,49 @@ The `Controller` is used to control the `index` of the Swiper, start or stop aut
 | :------------ |:---------------:| :-----|
 | autoplayDelay | 3000  | Autoplay delay milliseconds. |
 | autoplayDisableOnInteraction | true | If set true, `autoplay` is disabled when use swipes. |
+
+## 3D effects
+
+Turn on 3D with `enable3D`. This only applies to `layout: SwiperLayout.DEFAULT`. An explicit `transformer` still wins.
+
+```dart
+Swiper(
+  itemBuilder: (context, index) {
+    return Image.network(
+      "https://via.placeholder.com/350x150",
+      fit: BoxFit.fill,
+    );
+  },
+  itemCount: 5,
+  enable3D: true,
+  threeDStyle: Swiper3DStyle.cube, // cube, threeD, flip, coverflow
+  pagination: const SwiperPagination(),
+)
+```
+
+Coverflow looks best with a smaller viewport:
+
+```dart
+Swiper(
+  itemBuilder: (context, index) { /* ... */ },
+  itemCount: 5,
+  viewportFraction: 0.75,
+  enable3D: true,
+  threeDStyle: Swiper3DStyle.coverflow,
+)
+```
+
+Other built-in transformers (not via the 3D switch):
+
+```dart
+Swiper(
+  transformer: AccordionTransformer(), // or DepthPageTransformer, ZoomInPageTransformer, ZoomOutPageTransformer
+  itemBuilder: (context, index) { /* ... */ },
+  itemCount: 5,
+)
+```
+
+See the example app for a live switch and style picker.
 
 ## Build in layouts
 ![](https://github.com/jzoom/images/raw/master/layout1.gif)

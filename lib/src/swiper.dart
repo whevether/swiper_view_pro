@@ -3,9 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_swiper_view/flutter_swiper_view.dart';
-
-import 'transformer_page_view.dart';
+import 'package:swiper_view_pro/swiper_view_pro.dart';
 
 part 'custom_layout.dart';
 
@@ -118,6 +116,16 @@ class Swiper extends StatefulWidget {
   // This value is valid when viewportFraction is set and < 1.0
   final double? fade;
 
+  /// 3D effect switch. Only applies when [layout] is [SwiperLayout.DEFAULT]
+  /// and [transformer] is null.
+  final bool enable3D;
+
+  /// 3D style used when [enable3D] is true.
+  final Swiper3DStyle threeDStyle;
+
+  /// Perspective strength written to `Matrix4.setEntry(3, 2, perspective)`.
+  final double perspective;
+
   final PageIndicatorLayout indicatorLayout;
 
   final bool allowImplicitScrolling;
@@ -158,6 +166,9 @@ class Swiper extends StatefulWidget {
     this.outer = false,
     this.scale,
     this.fade,
+    this.enable3D = false,
+    this.threeDStyle = Swiper3DStyle.cube,
+    this.perspective = 0.001,
     this.allowImplicitScrolling = false,
   })  : assert(
           itemBuilder != null || transformer != null,
@@ -206,12 +217,18 @@ class Swiper extends StatefulWidget {
     double? fade,
     PageIndicatorLayout indicatorLayout = PageIndicatorLayout.NONE,
     SwiperLayout layout = SwiperLayout.DEFAULT,
+    bool enable3D = false,
+    Swiper3DStyle threeDStyle = Swiper3DStyle.cube,
+    double perspective = 0.001,
   }) =>
       Swiper(
         fade: fade,
         indicatorLayout: indicatorLayout,
         layout: layout,
         transformer: transformer,
+        enable3D: enable3D,
+        threeDStyle: threeDStyle,
+        perspective: perspective,
         customLayoutOption: customLayoutOption,
         containerHeight: containerHeight,
         containerWidth: containerWidth,
@@ -276,12 +293,18 @@ class Swiper extends StatefulWidget {
     double? fade,
     PageIndicatorLayout indicatorLayout = PageIndicatorLayout.NONE,
     SwiperLayout layout = SwiperLayout.DEFAULT,
+    bool enable3D = false,
+    Swiper3DStyle threeDStyle = Swiper3DStyle.cube,
+    double perspective = 0.001,
   }) =>
       Swiper(
         fade: fade,
         indicatorLayout: indicatorLayout,
         layout: layout,
         transformer: transformer,
+        enable3D: enable3D,
+        threeDStyle: threeDStyle,
+        perspective: perspective,
         customLayoutOption: customLayoutOption,
         containerHeight: containerHeight,
         containerWidth: containerWidth,
@@ -312,6 +335,18 @@ class Swiper extends StatefulWidget {
         },
         itemCount: list.length,
       );
+
+  /// Resolved transformer: explicit [transformer] > [enable3D] > [scale]/[fade].
+  PageTransformer? get resolvedTransformer {
+    if (transformer != null) return transformer;
+    if (enable3D) {
+      return build3DTransformer(threeDStyle, perspective: perspective);
+    }
+    if (scale != null || fade != null) {
+      return ScaleAndFadeTransformer(scale: scale, fade: fade);
+    }
+    return null;
+  }
 
   @override
   State<StatefulWidget> createState() => _SwiperState();
@@ -416,7 +451,7 @@ class _SwiperState extends _SwiperTimerMixin {
         initialPage: widget.index ?? widget.controller?.index ?? 0,
         loop: widget.loop,
         itemCount: widget.itemCount,
-        reverse: widget.transformer?.reverse ?? false,
+        reverse: widget.resolvedTransformer?.reverse ?? false,
         viewportFraction: widget.viewportFraction,
       );
     }
@@ -431,7 +466,8 @@ class _SwiperState extends _SwiperTimerMixin {
     super.didChangeDependencies();
   }
 
-  bool _getReverse(Swiper widget) => widget.transformer?.reverse ?? false;
+  bool _getReverse(Swiper widget) =>
+      widget.resolvedTransformer?.reverse ?? false;
 
   @override
   void didUpdateWidget(Swiper oldWidget) {
@@ -496,11 +532,7 @@ class _SwiperState extends _SwiperTimerMixin {
         axisDirection: widget.axisDirection,
       );
     } else if (_isPageViewLayout()) {
-      PageTransformer? transformer = widget.transformer;
-      if (widget.scale != null || widget.fade != null) {
-        transformer =
-            ScaleAndFadeTransformer(scale: widget.scale, fade: widget.fade);
-      }
+      PageTransformer? transformer = widget.resolvedTransformer;
 
       Widget child = TransformerPageView(
         pageController: _pageController,
@@ -963,40 +995,5 @@ class _StackViewState extends _CustomLayoutStateBase<_StackSwiper> {
         ),
       ),
     );
-  }
-}
-
-class ScaleAndFadeTransformer extends PageTransformer {
-  final double? _scale;
-  final double? _fade;
-
-  ScaleAndFadeTransformer({double? fade = 0.3, double? scale = 0.8})
-      : _fade = fade,
-        _scale = scale;
-
-  @override
-  Widget transform(Widget child, TransformInfo info) {
-    double? position = info.position;
-    Widget newChild = child;
-    if (_scale != null) {
-      double scaleFactor = (1 - position!.abs()) * (1 - _scale!);
-      double scale = _scale! + scaleFactor;
-
-      newChild = Transform.scale(
-        scale: scale,
-        child: child,
-      );
-    }
-
-    if (_fade != null) {
-      double fadeFactor = (1 - position!.abs()) * (1 - _fade!);
-      double opacity = _fade! + fadeFactor;
-      newChild = Opacity(
-        opacity: opacity,
-        child: newChild,
-      );
-    }
-
-    return newChild;
   }
 }

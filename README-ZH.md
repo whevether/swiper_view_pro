@@ -10,8 +10,8 @@
     <a href="https://github.com/whevether/flutter_swiper_view/pulls">
         <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg" alt="PRs Welcome" />
     </a>
-    <a href="https://pub.flutter-io.cn/packages/flutter_swiper_view">
-        <img src="https://img.shields.io/pub/v/flutter_swiper_view.svg" alt="pub package" />
+    <a href="https://pub.flutter-io.cn/packages/swiper_view_pro">
+        <img src="https://img.shields.io/pub/v/swiper_view_pro.svg" alt="pub package" />
     </a>
 </p>
 <p align="center">
@@ -21,9 +21,9 @@
 </p>
 
 
-# flutter_swiper_view
+# swiper_view_pro
 
-flutter 最强大的 swiper, 多种布局方式，无限轮播，Android 和 iOS 双端适配.
+Flutter swiper/carousel，多种布局、无限轮播、可配置 3D 效果，兼容 Android 与 iOS。
 
 
 # :sparkles::sparkles: New Features: 视差
@@ -73,6 +73,7 @@ flutter 最强大的 swiper, 多种布局方式，无限轮播，Android 和 iOS
 - [x] 非无限循环模式
 - [x] 单元测试
 - [x] 例子
+- [x] 可配置 3D 效果
 - [x] 滚动方向
 - [x] 可定制控制按钮
 - [x] 可定制分页
@@ -96,6 +97,7 @@ flutter 最强大的 swiper, 多种布局方式，无限轮播，Android 和 iOS
   + [控制按钮](#控制按钮)
   + [控制器](#控制器)
   + [自动播放](#自动播放)
++ [3D 效果](#3d-效果)
 + [内建的布局](#内建的布局)
 + [一些常用代码示例](#代码)
 
@@ -105,7 +107,7 @@ flutter 最强大的 swiper, 多种布局方式，无限轮播，Android 和 iOS
 
 ```dart
 dependencies:
-  flutter_swiper_view: ^1.1.8
+  swiper_view_pro: ^0.1.0
 ```
 到项目根目录下的 pubspec.yaml ,并且根目录运行命令行 
 
@@ -127,7 +129,7 @@ flutter create myapp
 ```dart
 import 'package:flutter/material.dart';
 
-import 'package:flutter_swiper_view/flutter_swiper_view.dart';
+import 'package:swiper_view_pro/swiper_view_pro.dart';
 
 void main() => runApp(const MyApp());
 
@@ -194,6 +196,9 @@ class _MyHomePageState extends State<MyHomePage> {
 | duration        | 300.0            | 动画时间，单位是毫秒 |
 | pagination      | null             | 设置 `SwiperPagination()` 展示默认分页指示器
 | control | null | 设置 `SwiperControl()` 展示默认分页按钮
+| enable3D | false | 3D 效果总开关。仅 `SwiperLayout.DEFAULT` 且未设置 `transformer` 时生效。 |
+| threeDStyle | Swiper3DStyle.cube | 打开 3D 后的样式：`cube`、`threeD`、`flip`、`coverflow`。 |
+| perspective | 0.001 | 3D 透视强度。 |
 
 
 #### 分页指示器
@@ -258,7 +263,48 @@ Swiper(
 | autoplayDely | 3000  | 自动播放延迟毫秒数. |
 | autoplayDisableOnInteraction | true | 当用户拖拽的时候，是否停止自动播放. |
 
+## 3D 效果
 
+用 `enable3D` 打开 3D，仅 `layout: SwiperLayout.DEFAULT` 生效。若同时传入 `transformer`，以 `transformer` 为准。
+
+```dart
+Swiper(
+  itemBuilder: (context, index) {
+    return Image.network(
+      "https://via.placeholder.com/350x150",
+      fit: BoxFit.fill,
+    );
+  },
+  itemCount: 5,
+  enable3D: true,
+  threeDStyle: Swiper3DStyle.cube, // cube, threeD, flip, coverflow
+  pagination: const SwiperPagination(),
+)
+```
+
+封面流建议配合较小的 `viewportFraction`：
+
+```dart
+Swiper(
+  itemBuilder: (context, index) { /* ... */ },
+  itemCount: 5,
+  viewportFraction: 0.75,
+  enable3D: true,
+  threeDStyle: Swiper3DStyle.coverflow,
+)
+```
+
+其他内置 transformer（不走 3D 开关）：
+
+```dart
+Swiper(
+  transformer: AccordionTransformer(), // 或 DepthPageTransformer、ZoomInPageTransformer、ZoomOutPageTransformer
+  itemBuilder: (context, index) { /* ... */ },
+  itemCount: 5,
+)
+```
+
+示例应用里可以用开关和下拉实时预览。
 
 ## 内建的布局
 ![](https://github.com/jzoom/images/raw/master/layout1.gif)
