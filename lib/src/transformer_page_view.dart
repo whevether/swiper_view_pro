@@ -2,14 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import 'index_controller.dart';
 
-///
-/// NOTICE::
-///
-/// In order to make package smaller,currently we're not supporting any build-in page transformers
-/// You can find build in transforms here:
-///
-///
-///
+/// PageView with optional [PageTransformer] support.
+/// Built-in transformers live in `transformers.dart`.
 
 const int kMaxValue = 2000000000;
 const int kMiddleValue = 1000000000;
@@ -576,6 +570,7 @@ class _TransformerPageViewState extends State<TransformerPageView> {
             )
             .whenComplete(event.complete);
       } else {
+        _pageController.jumpToPage(index);
         event.complete();
       }
     } else {

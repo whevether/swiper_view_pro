@@ -42,10 +42,16 @@ class SwiperControl extends SwiperPlugin {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
+        if (!config!.loop) {
+          if (previous && config.activeIndex <= 0) return;
+          if (!previous && config.activeIndex >= config.itemCount - 1) {
+            return;
+          }
+        }
         if (previous) {
-          config!.controller.previous(animation: true);
+          config.controller.previous(animation: true);
         } else {
-          config!.controller.next(animation: true);
+          config.controller.next(animation: true);
         }
       },
       child: Padding(

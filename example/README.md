@@ -17,7 +17,8 @@ flutter run
 | 操作 | 效果 |
 |------|------|
 | 首页列表 | 进入各布局 / 效果演示 |
-| 3D switch 页 | 开关 `enable3D`，下拉选择 cube / threeD / flip / coverflow |
+| 3D switch 页 | 开关 `enable3D`，下拉选择 cube / threeD / flip / coverflow / carousel / cards / rotate |
+| Multi-card / RTL / Playback | 一屏多卡、RTL、宿主播放钩子（无内置视频组件） |
 | Accordion / Depth / Zoom | 预览非 3D 的内置 transformer |
 | CUSTOM | 见 [lib/src/example_custom.dart](lib/src/example_custom.dart) |
 

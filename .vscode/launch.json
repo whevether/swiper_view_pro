@@ -6,18 +6,18 @@
     "configurations": [
     
         {
-            "name": "flutter_swiper_view",
+            "name": "swiper_view_pro",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "flutter_swiper_view (profile mode)",
+            "name": "swiper_view_pro (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "flutter_swiper_view (release mode)",
+            "name": "swiper_view_pro (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

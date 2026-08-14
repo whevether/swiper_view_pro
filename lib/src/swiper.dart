@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:swiper_view_pro/swiper_view_pro.dart';
 
 part 'custom_layout.dart';
@@ -46,8 +47,8 @@ class Swiper extends StatefulWidget {
   /// Build item on index
   final IndexedWidgetBuilder? itemBuilder;
 
-  /// Support transform like Android PageView did
-  /// `itemBuilder` and `transformItemBuilder` must have one not null
+  /// Support transform like Android PageView did.
+  /// `itemBuilder` and `transformer` must have one not null.
   final PageTransformer? transformer;
 
   /// count of the display items
@@ -121,6 +122,9 @@ class Swiper extends StatefulWidget {
   final bool enable3D;
 
   /// 3D style used when [enable3D] is true.
+  ///
+  /// [Swiper3DStyle.coverflow] and [Swiper3DStyle.carousel] look best with
+  /// `viewportFraction` around 0.7–0.75.
   final Swiper3DStyle threeDStyle;
 
   /// Perspective strength written to `Matrix4.setEntry(3, 2, perspective)`.
@@ -130,11 +134,28 @@ class Swiper extends StatefulWidget {
 
   final bool allowImplicitScrolling;
 
+  /// Same as [PageView.pageSnapping]. Only [SwiperLayout.DEFAULT].
+  final bool pageSnapping;
+
+  /// How many slides are visible. Only [SwiperLayout.DEFAULT].
+  /// Values like `2.5` peek the next slide. Ignored when [viewportFraction] is not 1.
+  final double slidesPerView;
+
+  /// Gap between slides. Only [SwiperLayout.DEFAULT].
+  final double spaceBetween;
+
+  /// Arrow keys change slides when the swiper is focused.
+  final bool enableKeyboard;
+
+  /// When non-null, overrides automatic RTL for horizontal [PageView.reverse].
+  final bool? reverse;
+
+  /// Host-owned media hooks. This package does not embed a video widget.
+  final SwiperPlaybackConfig? playback;
+
   const Swiper({
     this.itemBuilder,
     this.indicatorLayout = PageIndicatorLayout.NONE,
-
-    ///
     this.transformer,
     required this.itemCount,
     bool autoplay = false,
@@ -156,8 +177,6 @@ class Swiper extends StatefulWidget {
     super.key,
     this.controller,
     this.customLayoutOption,
-
-    /// since v1.0.0
     this.containerHeight,
     this.containerWidth,
     this.viewportFraction = 1.0,
@@ -170,10 +189,21 @@ class Swiper extends StatefulWidget {
     this.threeDStyle = Swiper3DStyle.cube,
     this.perspective = 0.001,
     this.allowImplicitScrolling = false,
+    this.pageSnapping = true,
+    this.slidesPerView = 1,
+    this.spaceBetween = 0,
+    this.enableKeyboard = true,
+    this.reverse,
+    this.playback,
   })  : assert(
           itemBuilder != null || transformer != null,
-          'itemBuilder and transformItemBuilder must not be both null',
+          'itemBuilder and transformer must not be both null',
         ),
+        assert(
+          layout != SwiperLayout.CUSTOM || customLayoutOption != null,
+          'customLayoutOption must not be null when layout is SwiperLayout.CUSTOM',
+        ),
+        assert(slidesPerView > 0, 'slidesPerView must be greater than 0'),
         assert(
             !loop ||
                 ((loop &&
@@ -213,13 +243,20 @@ class Swiper extends StatefulWidget {
     double? itemHeight,
     double? itemWidth,
     bool outer = false,
-    double scale = 1.0,
+    double? scale,
     double? fade,
     PageIndicatorLayout indicatorLayout = PageIndicatorLayout.NONE,
     SwiperLayout layout = SwiperLayout.DEFAULT,
     bool enable3D = false,
     Swiper3DStyle threeDStyle = Swiper3DStyle.cube,
     double perspective = 0.001,
+    bool allowImplicitScrolling = false,
+    bool pageSnapping = true,
+    double slidesPerView = 1,
+    double spaceBetween = 0,
+    bool enableKeyboard = true,
+    bool? reverse,
+    SwiperPlaybackConfig? playback,
   }) =>
       Swiper(
         fade: fade,
@@ -254,6 +291,13 @@ class Swiper extends StatefulWidget {
         plugins: plugins,
         physics: physics,
         key: key,
+        allowImplicitScrolling: allowImplicitScrolling,
+        pageSnapping: pageSnapping,
+        slidesPerView: slidesPerView,
+        spaceBetween: spaceBetween,
+        enableKeyboard: enableKeyboard,
+        reverse: reverse,
+        playback: playback,
         itemBuilder: (context, index) {
           return children[index];
         },
@@ -267,7 +311,7 @@ class Swiper extends StatefulWidget {
     required SwiperDataBuilder<T> builder,
     bool autoplay = false,
     int autoplayDelay = kDefaultAutoplayDelayMs,
-    bool reverse = false,
+    bool? reverse,
     bool autoplayDisableOnInteraction = true,
     int duration = kDefaultAutoplayTransactionDuration,
     ValueChanged<int>? onIndexChanged,
@@ -289,13 +333,19 @@ class Swiper extends StatefulWidget {
     double? itemHeight,
     double? itemWidth,
     bool outer = false,
-    double scale = 1.0,
+    double? scale,
     double? fade,
     PageIndicatorLayout indicatorLayout = PageIndicatorLayout.NONE,
     SwiperLayout layout = SwiperLayout.DEFAULT,
     bool enable3D = false,
     Swiper3DStyle threeDStyle = Swiper3DStyle.cube,
     double perspective = 0.001,
+    bool allowImplicitScrolling = false,
+    bool pageSnapping = true,
+    double slidesPerView = 1,
+    double spaceBetween = 0,
+    bool enableKeyboard = true,
+    SwiperPlaybackConfig? playback,
   }) =>
       Swiper(
         fade: fade,
@@ -330,6 +380,13 @@ class Swiper extends StatefulWidget {
         loop: loop,
         plugins: plugins,
         physics: physics,
+        reverse: reverse,
+        allowImplicitScrolling: allowImplicitScrolling,
+        pageSnapping: pageSnapping,
+        slidesPerView: slidesPerView,
+        spaceBetween: spaceBetween,
+        enableKeyboard: enableKeyboard,
+        playback: playback,
         itemBuilder: (context, index) {
           return builder(context, list[index], index);
         },
@@ -346,6 +403,12 @@ class Swiper extends StatefulWidget {
       return ScaleAndFadeTransformer(scale: scale, fade: fade);
     }
     return null;
+  }
+
+  double get resolvedViewportFraction {
+    if (viewportFraction != 1.0) return viewportFraction;
+    if (slidesPerView != 1.0) return 1.0 / slidesPerView;
+    return 1.0;
   }
 
   @override
@@ -385,13 +448,10 @@ abstract class _SwiperTimerMixin extends State<Swiper> {
   @override
   void didUpdateWidget(Swiper oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_controller != oldWidget.controller) {
-      final oldController = oldWidget.controller;
-      if (oldController != null) {
-        oldController.removeListener(_onController);
-        _controller = oldController;
-        _controller.addListener(_onController);
-      }
+    if (widget.controller != oldWidget.controller) {
+      _controller.removeListener(_onController);
+      _controller = widget.controller ?? SwiperController();
+      _controller.addListener(_onController);
     }
     if (widget.autoplay != oldWidget.autoplay) {
       if (widget.autoplay) {
@@ -409,7 +469,16 @@ abstract class _SwiperTimerMixin extends State<Swiper> {
     super.dispose();
   }
 
+  bool _shouldPauseForPlayback() {
+    final playback = widget.playback;
+    if (playback == null || !playback.pauseAutoplayWhilePlaying) {
+      return false;
+    }
+    return playback.playing?.value ?? false;
+  }
+
   void _startAutoplay() {
+    if (_shouldPauseForPlayback()) return;
     _stopAutoplay();
     _timer = Timer.periodic(
       Duration(
@@ -434,11 +503,32 @@ class _SwiperState extends _SwiperTimerMixin {
 
   TransformerPageController? _pageController;
 
-  Widget _wrapTap(BuildContext context, int index) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => widget.onTap!(index),
-      child: widget.itemBuilder!(context, index),
+  Widget _buildItem(BuildContext context, int index) {
+    return SwiperItemScope(
+      index: index,
+      activeIndex: _activeIndex,
+      child: Builder(
+        builder: (context) {
+          Widget child = widget.itemBuilder!(context, index);
+          if (widget.spaceBetween > 0 && _isPageViewLayout()) {
+            final half = widget.spaceBetween / 2;
+            child = Padding(
+              padding: widget.scrollDirection == Axis.horizontal
+                  ? EdgeInsets.symmetric(horizontal: half)
+                  : EdgeInsets.symmetric(vertical: half),
+              child: child,
+            );
+          }
+          if (widget.onTap != null) {
+            child = GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => widget.onTap!(index),
+              child: child,
+            );
+          }
+          return child;
+        },
+      ),
     );
   }
 
@@ -446,45 +536,82 @@ class _SwiperState extends _SwiperTimerMixin {
   void initState() {
     super.initState();
     _activeIndex = widget.index ?? widget.controller?.index ?? 0;
-    if (_isPageViewLayout()) {
-      _pageController = TransformerPageController(
-        initialPage: widget.index ?? widget.controller?.index ?? 0,
-        loop: widget.loop,
-        itemCount: widget.itemCount,
-        reverse: widget.resolvedTransformer?.reverse ?? false,
-        viewportFraction: widget.viewportFraction,
-      );
-    }
+    _controller.index = _activeIndex;
+    widget.playback?.playing?.addListener(_onPlayingChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.playback?.onActiveChanged?.call(_activeIndex, true);
+    });
   }
 
   bool _isPageViewLayout() {
     return widget.layout == SwiperLayout.DEFAULT;
   }
 
-  bool _getReverse(Swiper widget) =>
-      widget.resolvedTransformer?.reverse ?? false;
+  bool _pageReverse(BuildContext context) {
+    final transformerReverse = widget.resolvedTransformer?.reverse ?? false;
+    final rtl = widget.scrollDirection == Axis.horizontal &&
+        Directionality.of(context) == TextDirection.rtl;
+    if (widget.reverse != null) {
+      return widget.reverse! ^ transformerReverse;
+    }
+    return rtl ^ transformerReverse;
+  }
+
+  AxisDirection _stackAxisDirection(BuildContext context) {
+    var dir = widget.axisDirection;
+    final rtl = widget.scrollDirection == Axis.horizontal &&
+        Directionality.of(context) == TextDirection.rtl;
+    final flip = widget.reverse ?? rtl;
+    if (flip && dir == AxisDirection.left) return AxisDirection.right;
+    if (flip && dir == AxisDirection.right) return AxisDirection.left;
+    return dir;
+  }
+
+  void _ensurePageController(BuildContext context) {
+    if (!_isPageViewLayout()) {
+      if (_pageController != null) {
+        scheduleMicrotask(() {
+          _pageController?.dispose();
+          _pageController = null;
+        });
+      }
+      return;
+    }
+    final reverse = _pageReverse(context);
+    final vf = widget.resolvedViewportFraction;
+    if (_pageController == null ||
+        _pageController!.reverse != reverse ||
+        _pageController!.viewportFraction != vf ||
+        _pageController!.loop != widget.loop ||
+        _pageController!.itemCount != widget.itemCount) {
+      _pageController = TransformerPageController(
+        initialPage: widget.index ?? _activeIndex,
+        loop: widget.loop,
+        itemCount: widget.itemCount,
+        reverse: reverse,
+        viewportFraction: vf,
+      );
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ensurePageController(context);
+  }
 
   @override
   void didUpdateWidget(Swiper oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.playback?.playing != oldWidget.playback?.playing) {
+      oldWidget.playback?.playing?.removeListener(_onPlayingChanged);
+      widget.playback?.playing?.addListener(_onPlayingChanged);
+    }
     if (_isPageViewLayout()) {
-      if (_pageController == null ||
-          (widget.index != oldWidget.index ||
-              widget.loop != oldWidget.loop ||
-              widget.itemCount != oldWidget.itemCount ||
-              widget.viewportFraction != oldWidget.viewportFraction ||
-              _getReverse(widget) != _getReverse(oldWidget))) {
-        _pageController = TransformerPageController(
-          initialPage: widget.index ?? widget.controller?.index ?? 0,
-          loop: widget.loop,
-          itemCount: widget.itemCount,
-          reverse: _getReverse(widget),
-          viewportFraction: widget.viewportFraction,
-        );
-      }
+      _ensurePageController(context);
     } else {
       scheduleMicrotask(() {
-        // So that we have a chance to do `removeListener` in child widgets.
         if (_pageController != null) {
           _pageController!.dispose();
           _pageController = null;
@@ -493,23 +620,47 @@ class _SwiperState extends _SwiperTimerMixin {
     }
     if (widget.index != null && widget.index != _activeIndex) {
       _activeIndex = widget.index!;
+      _controller.index = _activeIndex;
+    }
+  }
+
+  void _onPlayingChanged() {
+    if (_shouldPauseForPlayback()) {
+      _stopAutoplay();
+    } else if (widget.autoplay) {
+      _startAutoplay();
     }
   }
 
   void _onIndexChanged(int index) {
+    final previous = _activeIndex;
     setState(() {
       _activeIndex = index;
     });
+    _controller.index = index;
     widget.onIndexChanged?.call(index);
+    if (previous != index) {
+      widget.playback?.onActiveChanged?.call(previous, false);
+      widget.playback?.onActiveChanged?.call(index, true);
+    }
+  }
+
+  VoidCallback? get _dragStart {
+    if (widget.autoplayDisableOnInteraction && widget.autoplay) {
+      return _stopAutoplay;
+    }
+    return null;
+  }
+
+  VoidCallback? get _dragEnd {
+    if (widget.autoplayDisableOnInteraction && widget.autoplay) {
+      return _startAutoplay;
+    }
+    return null;
   }
 
   Widget _buildSwiper() {
-    IndexedWidgetBuilder? itemBuilder;
-    if (widget.onTap != null) {
-      itemBuilder = _wrapTap;
-    } else {
-      itemBuilder = widget.itemBuilder;
-    }
+    final itemBuilder = widget.itemBuilder == null ? null : _buildItem;
 
     if (widget.layout == SwiperLayout.STACK) {
       return _StackSwiper(
@@ -524,7 +675,9 @@ class _SwiperState extends _SwiperTimerMixin {
         onIndexChanged: _onIndexChanged,
         controller: _controller,
         scrollDirection: widget.scrollDirection,
-        axisDirection: widget.axisDirection,
+        axisDirection: _stackAxisDirection(context),
+        onDragStart: _dragStart,
+        onDragEnd: _dragEnd,
       );
     } else if (_isPageViewLayout()) {
       PageTransformer? transformer = widget.resolvedTransformer;
@@ -535,7 +688,7 @@ class _SwiperState extends _SwiperTimerMixin {
         itemCount: widget.itemCount,
         itemBuilder: itemBuilder,
         transformer: transformer,
-        viewportFraction: widget.viewportFraction,
+        viewportFraction: widget.resolvedViewportFraction,
         index: _activeIndex,
         duration: Duration(milliseconds: widget.duration),
         scrollDirection: widget.scrollDirection,
@@ -544,13 +697,13 @@ class _SwiperState extends _SwiperTimerMixin {
         physics: widget.physics,
         controller: _controller,
         allowImplicitScrolling: widget.allowImplicitScrolling,
+        pageSnapping: widget.pageSnapping,
       );
       if (widget.autoplayDisableOnInteraction && widget.autoplay) {
         return NotificationListener(
           onNotification: (notification) {
             if (notification is ScrollStartNotification) {
               if (notification.dragDetails != null) {
-                //by human
                 if (_timer != null) _stopAutoplay();
               }
             } else if (notification is ScrollEndNotification) {
@@ -577,6 +730,8 @@ class _SwiperState extends _SwiperTimerMixin {
         onIndexChanged: _onIndexChanged,
         controller: _controller,
         scrollDirection: widget.scrollDirection,
+        onDragStart: _dragStart,
+        onDragEnd: _dragEnd,
       );
     } else if (widget.layout == SwiperLayout.CUSTOM) {
       return _CustomLayoutSwiper(
@@ -592,6 +747,8 @@ class _SwiperState extends _SwiperTimerMixin {
         onIndexChanged: _onIndexChanged,
         controller: _controller,
         scrollDirection: widget.scrollDirection,
+        onDragStart: _dragStart,
+        onDragEnd: _dragEnd,
       );
     } else {
       return const SizedBox.shrink();
@@ -608,7 +765,7 @@ class _SwiperState extends _SwiperTimerMixin {
           pageController: _pageController,
           activeIndex: _activeIndex,
           scrollDirection: widget.scrollDirection,
-          axisDirection: widget.axisDirection,
+          axisDirection: _stackAxisDirection(context),
           controller: _controller,
           loop: widget.loop,
         );
@@ -629,13 +786,62 @@ class _SwiperState extends _SwiperTimerMixin {
     return resList;
   }
 
+  Widget _wrapKeyboard(Widget child) {
+    if (!widget.enableKeyboard) return child;
+    final rtl = widget.scrollDirection == Axis.horizontal &&
+        Directionality.of(context) == TextDirection.rtl;
+    final horizontal = widget.scrollDirection == Axis.horizontal;
+    return CallbackShortcuts(
+      bindings: {
+        if (horizontal) ...{
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+            if (rtl) {
+              _controller.next();
+            } else {
+              _controller.previous();
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+            if (rtl) {
+              _controller.previous();
+            } else {
+              _controller.next();
+            }
+          },
+        } else ...{
+          const SingleActivator(LogicalKeyboardKey.arrowUp): () {
+            _controller.previous();
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowDown): () {
+            _controller.next();
+          },
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        descendantsAreFocusable: false,
+        child: child,
+      ),
+    );
+  }
+
+  Widget _constrain(Widget child) {
+    if (widget.containerHeight == null && widget.containerWidth == null) {
+      return child;
+    }
+    return SizedBox(
+      height: widget.containerHeight,
+      width: widget.containerWidth,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget swiper = _buildSwiper();
     List<Widget>? listForStack;
     SwiperPluginConfig? config;
     if (widget.control != null) {
-      //Stack
       config = _ensureConfig(config);
       listForStack = _ensureListForStack(
         swiper: swiper,
@@ -657,10 +863,11 @@ class _SwiperState extends _SwiperTimerMixin {
     if (widget.pagination != null) {
       config = _ensureConfig(config);
       if (widget.outer) {
-        return _buildOuterPagination(
-            widget.pagination! as SwiperPagination,
-            listForStack == null ? swiper : Stack(children: listForStack),
-            config);
+        return _wrapKeyboard(_buildOuterPagination(
+          widget.pagination!,
+          listForStack == null ? swiper : Stack(children: listForStack),
+          config,
+        ));
       } else {
         listForStack = _ensureListForStack(
           swiper: swiper,
@@ -670,38 +877,69 @@ class _SwiperState extends _SwiperTimerMixin {
       }
     }
 
-    if (listForStack != null) {
-      return Stack(
-        children: listForStack,
-      );
-    }
-
-    return swiper;
+    Widget result = listForStack != null
+        ? Stack(children: listForStack)
+        : swiper;
+    return _wrapKeyboard(_constrain(result));
   }
 
   Widget _buildOuterPagination(
-    SwiperPagination pagination,
+    SwiperPlugin pagination,
     Widget swiper,
     SwiperPluginConfig config,
   ) {
-    final list = <Widget>[];
-    //Only support bottom yet!
-    if (widget.containerHeight != null || widget.containerWidth != null) {
-      list.add(swiper);
-    } else {
-      list.add(Expanded(child: swiper));
-    }
-
-    list.add(Align(
+    final alignment =
+        pagination is SwiperPagination ? pagination.alignment : null;
+    final pager = Align(
       alignment: Alignment.center,
       child: pagination.build(context, config),
-    ));
+    );
+
+    final hasSize =
+        widget.containerHeight != null || widget.containerWidth != null;
+    final sizedSwiper = hasSize
+        ? SizedBox(
+            height: widget.containerHeight,
+            width: widget.containerWidth,
+            child: swiper,
+          )
+        : swiper;
+
+    final vertical = widget.scrollDirection == Axis.vertical;
+    final putOnTop = alignment == Alignment.topCenter ||
+        alignment == Alignment.topLeft ||
+        alignment == Alignment.topRight;
+    final putOnStart = vertical &&
+        (alignment == Alignment.centerLeft ||
+            alignment == Alignment.topLeft ||
+            alignment == Alignment.bottomLeft);
+
+    if (vertical) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (putOnStart) pager,
+          hasSize ? sizedSwiper : Expanded(child: sizedSwiper),
+          if (!putOnStart) pager,
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
-      children: list,
+      children: [
+        if (putOnTop) pager,
+        hasSize ? sizedSwiper : Expanded(child: sizedSwiper),
+        if (!putOnTop) pager,
+      ],
     );
+  }
+
+  @override
+  void dispose() {
+    widget.playback?.playing?.removeListener(_onPlayingChanged);
+    super.dispose();
   }
 }
 
@@ -718,6 +956,8 @@ abstract class _SubSwiper extends StatefulWidget {
   final bool loop;
   final Axis? scrollDirection;
   final AxisDirection? axisDirection;
+  final VoidCallback? onDragStart;
+  final VoidCallback? onDragEnd;
 
   const _SubSwiper({
     required this.loop,
@@ -732,6 +972,8 @@ abstract class _SubSwiper extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.axisDirection = AxisDirection.left,
     this.onIndexChanged,
+    this.onDragStart,
+    this.onDragEnd,
   });
 
   @override
@@ -760,6 +1002,8 @@ class _TinderSwiper extends _SubSwiper {
     required super.loop,
     required super.itemCount,
     super.scrollDirection,
+    super.onDragStart,
+    super.onDragEnd,
   }) : assert(itemWidth != null && itemHeight != null);
 
   @override
@@ -782,6 +1026,8 @@ class _StackSwiper extends _SubSwiper {
     required super.itemCount,
     super.scrollDirection,
     super.axisDirection,
+    super.onDragStart,
+    super.onDragEnd,
   });
 
   @override

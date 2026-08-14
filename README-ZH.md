@@ -1,13 +1,10 @@
 ![Logo](banner.jpg)
 
 <p align="center">
-    <a href="https://travis-ci.org/feicien/flutter_swiper_view">
-        <img src="https://travis-ci.org/feicien/flutter_swiper_view.svg?branch=master" alt="Build Status" />
+    <a href="https://github.com/whevether/swiper_view_pro">
+        <img src="https://img.shields.io/badge/GitHub-swiper__view__pro-blue.svg" alt="GitHub" />
     </a>
-    <a href="https://coveralls.io/github/feicien/flutter_swiper_view?branch=master">
-        <img src="https://coveralls.io/repos/github/feicien/flutter_swiper_view/badge.svg?branch=master" alt="Coverage Status" />
-    </a>
-    <a href="https://github.com/whevether/flutter_swiper_view/pulls">
+    <a href="https://github.com/whevether/swiper_view_pro/pulls">
         <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg" alt="PRs Welcome" />
     </a>
     <a href="https://pub.flutter-io.cn/packages/swiper_view_pro">
@@ -15,7 +12,7 @@
     </a>
 </p>
 <p align="center">
-    <a href="https://github.com/whevether/flutter_swiper_view">
+    <a href="https://github.com/whevether/swiper_view_pro">
         <b>英文说明</b>
     </a>
 </p>
@@ -49,15 +46,15 @@ Flutter swiper/carousel，多种布局、无限轮播、可配置 3D 效果，�
 
 # 截图
 
-![Horizontal](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/1.gif)
+![Horizontal](https://github.com/whevether/swiper_view_pro/raw/main/example/res/1.gif)
 
-![Vertical](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/2.gif)
+![Vertical](https://github.com/whevether/swiper_view_pro/raw/main/example/res/2.gif)
 
-![Custom Pagination](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/3.gif)
+![Custom Pagination](https://github.com/whevether/swiper_view_pro/raw/main/example/res/3.gif)
 
-![Custom Pagination](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/4.gif)
+![Custom Pagination](https://github.com/whevether/swiper_view_pro/raw/main/example/res/4.gif)
 
-![Phone](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/5.gif)
+![Phone](https://github.com/whevether/swiper_view_pro/raw/main/example/res/5.gif)
 
 ![Example](https://github.com/jzoom/images/raw/master/swiper-example.gif)
 
@@ -80,12 +77,12 @@ Flutter swiper/carousel，多种布局、无限轮播、可配置 3D 效果，�
 - [x] 自动播放
 - [x] 控制器
 - [x] 外部分页指示器
-- [ ] 更多布局方式
+- [x] 更多布局方式
 
 
 ## 更新日志
 
->参考:[CHANGELOG.md](https://github.com/whevether/flutter_swiper_view/blob/master/CHANGELOG-ZH.md)
+>参考:[CHANGELOG.md](https://github.com/whevether/swiper_view_pro/blob/main/CHANGELOG-ZH.md)
 
 ## 目录
 
@@ -98,6 +95,8 @@ Flutter swiper/carousel，多种布局、无限轮播、可配置 3D 效果，�
   + [控制器](#控制器)
   + [自动播放](#自动播放)
 + [3D 效果](#3d-效果)
++ [多卡布局](#多卡布局)
++ [视频 / 媒体](#视频--媒体)
 + [内建的布局](#内建的布局)
 + [一些常用代码示例](#代码)
 
@@ -189,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
 | :-------------- |:-----------------:| :------------------------|
 | scrollDirection | Axis.horizontal  |滚动方向，设置为 Axis.vertical 如果需要垂直滚动   |
 | loop            | true             |无限轮播模式开关                              |
-| index           | 0                |初始的时候下标位置                            |
+| index           | null             | 初始下标；为 null 时由 Swiper 自己管理（非受控） |
 | autoplay        | false             |自动播放开关. |
 | onIndexChanged  | void onIndexChanged(int index)  | 当用户手动拖拽或者自动播放引起下标改变的时候调用 |
 | onTap           | void onTap(int index)  | 当用户点击某个轮播的时候调用 |
@@ -197,8 +196,14 @@ class _MyHomePageState extends State<MyHomePage> {
 | pagination      | null             | 设置 `SwiperPagination()` 展示默认分页指示器
 | control | null | 设置 `SwiperControl()` 展示默认分页按钮
 | enable3D | false | 3D 效果总开关。仅 `SwiperLayout.DEFAULT` 且未设置 `transformer` 时生效。 |
-| threeDStyle | Swiper3DStyle.cube | 打开 3D 后的样式：`cube`、`threeD`、`flip`、`coverflow`。 |
+| threeDStyle | Swiper3DStyle.cube | 打开 3D 后的样式：`cube`、`threeD`、`flip`、`coverflow`、`carousel`、`cards`、`rotate`。 |
 | perspective | 0.001 | 3D 透视强度。 |
+| slidesPerView | 1 | 一屏可见张数，支持小数（如 `2.5`）。仅 DEFAULT。若同时设置了非 1 的 `viewportFraction`，以 `viewportFraction` 为准。 |
+| spaceBetween | 0 | 卡片间距。仅 DEFAULT。 |
+| pageSnapping | true | 是否页面对齐吸附。仅 DEFAULT。 |
+| enableKeyboard | true | 焦点下用方向键切页。 |
+| reverse | null | 非 null 时覆盖自动 RTL。 |
+| playback | null | 宿主播放器钩子，见下方「视频 / 媒体」。 |
 
 
 #### 分页指示器
@@ -260,7 +265,7 @@ Swiper(
 
 | 参数            | 默认值             |           描述     |
 | :------------ |:---------------:| :-----|
-| autoplayDely | 3000  | 自动播放延迟毫秒数. |
+| autoplayDelay | 3000  | 自动播放延迟毫秒数. |
 | autoplayDisableOnInteraction | true | 当用户拖拽的时候，是否停止自动播放. |
 
 ## 3D 效果
@@ -277,18 +282,30 @@ Swiper(
   },
   itemCount: 5,
   enable3D: true,
-  threeDStyle: Swiper3DStyle.cube, // cube, threeD, flip, coverflow
+  threeDStyle: Swiper3DStyle.cube, // cube, threeD, flip, coverflow, carousel, cards, rotate
   pagination: const SwiperPagination(),
 )
 ```
 
-封面流建议配合较小的 `viewportFraction`：
+内置 3D 样式：
+
+| 样式 | 效果 |
+|------|------|
+| `cube` | 立方体面沿公共棱原地翻转 |
+| `threeD` | 页面绕中心旋转并沿 Z 轴后退 |
+| `flip` | 卡片翻转 180° |
+| `coverflow` | 相邻页在一排中旋转、缩放 |
+| `carousel` | 页面排列在 3D 圆柱上 |
+| `cards` | 叠放卡片，顶卡带 3D 扭转飞出 |
+| `rotate` | 页面绕底边摆动 |
+
+`coverflow` 和 `carousel` 建议配合较小的 `viewportFraction`：
 
 ```dart
 Swiper(
   itemBuilder: (context, index) { /* ... */ },
   itemCount: 5,
-  viewportFraction: 0.75,
+  viewportFraction: 0.75, // carousel 可用 0.7
   enable3D: true,
   threeDStyle: Swiper3DStyle.coverflow,
 )
@@ -305,6 +322,45 @@ Swiper(
 ```
 
 示例应用里可以用开关和下拉实时预览。
+
+## 多卡布局
+
+仅 `SwiperLayout.DEFAULT`。`slidesPerView` 支持小数；若同时传入非 1 的 `viewportFraction`，以 `viewportFraction` 为准。
+
+```dart
+Swiper(
+  itemBuilder: (context, index) { /* ... */ },
+  itemCount: 8,
+  slidesPerView: 2.5,
+  spaceBetween: 12,
+)
+```
+
+水平方向会跟随 `Directionality` 做 RTL。方向键可切页（`enableKeyboard`，默认开启）。
+
+## 视频 / 媒体
+
+本包**不内置**视频组件，也不依赖 `video_player`。把你自己的播放器放进 `itemBuilder`，用 `playback` 和 `SwiperItemScope` 对接生命周期。
+
+```dart
+Swiper(
+  itemCount: videos.length,
+  playback: SwiperPlaybackConfig(
+    playing: isPlaying, // ValueNotifier<bool>，为 true 时暂停轮播自动播放
+    onActiveChanged: (index, active) {
+      if (active) {
+        players[index].play();
+      } else {
+        players[index].pause();
+      }
+    },
+  ),
+  itemBuilder: (context, index) {
+    final active = SwiperItemScope.of(context).isActive;
+    return YourVideoPlayer(url: videos[index], play: active);
+  },
+)
+```
 
 ## 内建的布局
 ![](https://github.com/jzoom/images/raw/master/layout1.gif)
@@ -452,4 +508,4 @@ ConstrainedBox(
 
 这里可以找到所有的定制选项
 
->https://github.com/whevether/flutter_swiper_view/blob/master/example/lib/src/example_custom.dart
+>https://github.com/whevether/swiper_view_pro/blob/main/example/lib/src/example_custom.dart

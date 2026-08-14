@@ -61,6 +61,9 @@ void main() {
       ThreeDTransformer(),
       FlipTransformer(),
       CoverflowTransformer(),
+      CarouselTransformer(),
+      CardsTransformer(),
+      RotateTransformer(),
     ];
     for (final transformer in transformers) {
       await tester.pumpWidget(MaterialApp(

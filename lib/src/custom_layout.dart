@@ -202,6 +202,7 @@ abstract class _CustomLayoutStateBase<T extends _SubSwiper> extends State<T>
   }
 
   void _onPanEnd(DragEndDetails details) {
+    widget.onDragEnd?.call();
     if (_lockScroll) return;
 
     double velocity = widget.scrollDirection == Axis.horizontal
@@ -225,6 +226,7 @@ abstract class _CustomLayoutStateBase<T extends _SubSwiper> extends State<T>
 
   void _onPanStart(DragStartDetails details) {
     if (_lockScroll) return;
+    widget.onDragStart?.call();
     _currentValue = _animationController.value;
     _currentPos = widget.scrollDirection == Axis.horizontal
         ? details.globalPosition.dx
@@ -233,12 +235,15 @@ abstract class _CustomLayoutStateBase<T extends _SubSwiper> extends State<T>
 
   void _onPanUpdate(DragUpdateDetails details) {
     if (_lockScroll) return;
+    final dimension = widget.scrollDirection == Axis.horizontal
+        ? _swiperWidth
+        : _swiperHeight;
     double value = _currentValue +
         ((widget.scrollDirection == Axis.horizontal
                     ? details.globalPosition.dx
                     : details.globalPosition.dy) -
                 _currentPos) /
-            _swiperWidth /
+            dimension /
             2;
     // no loop ?
     if (!widget.loop) {
@@ -391,6 +396,8 @@ class _CustomLayoutSwiper extends _SubSwiper {
     required super.itemCount,
     super.scrollDirection,
     required super.controller,
+    super.onDragStart,
+    super.onDragEnd,
   });
 
   @override

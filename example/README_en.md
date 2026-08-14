@@ -17,7 +17,8 @@ flutter run
 | Action | Effect |
 |--------|--------|
 | Home list | Open each layout / effect demo |
-| 3D switch page | Toggle `enable3D`, pick cube / threeD / flip / coverflow |
+| 3D switch page | Toggle `enable3D`, pick cube / threeD / flip / coverflow / carousel / cards / rotate |
+| Multi-card / RTL / Playback | Multi-card, RTL, host playback hooks (no built-in video widget) |
 | Accordion / Depth / Zoom | Preview non-3D built-in transformers |
 | CUSTOM | See [lib/src/example_custom.dart](lib/src/example_custom.dart) |
 

@@ -6,6 +6,7 @@ export 'src/swiper_pagination.dart';
 export 'src/swiper_control.dart';
 export 'src/swiper_controller.dart';
 export 'src/swiper_plugin.dart';
+export 'src/swiper_playback.dart';
 export 'src/transformer_page_view.dart'
     hide kMaxValue, kMiddleValue, kDefaultTransactionDuration;
 export 'src/transformers.dart';

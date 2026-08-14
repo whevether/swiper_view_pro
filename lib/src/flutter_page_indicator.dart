@@ -247,7 +247,17 @@ class _PageIndicatorState extends State<PageIndicator> {
       );
     }
 
-    return IgnorePointer(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: widget.onDotTap == null
+          ? null
+          : (details) {
+              final slot = widget.size + widget.space;
+              if (slot <= 0) return;
+              final i =
+                  (details.localPosition.dx / slot).floor().clamp(0, widget.count - 1);
+              widget.onDotTap!(i);
+            },
       child: child,
     );
   }
@@ -328,6 +338,8 @@ class PageIndicator extends StatefulWidget {
 
   final double activeSize;
 
+  final ValueChanged<int>? onDotTap;
+
   const PageIndicator({
     super.key,
     this.size = 20.0,
@@ -340,6 +352,7 @@ class PageIndicator extends StatefulWidget {
     this.activeColor = Colors.white,
     this.scale = 0.6,
     this.dropHeight = 20.0,
+    this.onDotTap,
   });
 
   @override

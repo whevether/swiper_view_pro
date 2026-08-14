@@ -39,9 +39,9 @@ mixin StepBasedIndexControllerEvent on TargetedPositionControllerEvent {
 
     if (!loop) {
       if (cIndex >= itemCount) {
-        cIndex = 0;
-      } else if (cIndex < 0) {
         cIndex = itemCount - 1;
+      } else if (cIndex < 0) {
+        cIndex = 0;
       }
     }
     return cIndex;

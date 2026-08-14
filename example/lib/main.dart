@@ -38,6 +38,9 @@ class ExampleHomePage extends StatelessWidget {
       _DemoItem('Default', const DefaultDemoPage()),
       _DemoItem('Scale & fade', const ScaleFadeDemoPage()),
       _DemoItem('3D switch', const ThreeDDemoPage()),
+      _DemoItem('Multi-card', const MultiCardDemoPage()),
+      _DemoItem('RTL', const RtlDemoPage()),
+      _DemoItem('Playback hooks', const PlaybackDemoPage()),
       _DemoItem('STACK', const StackDemoPage()),
       _DemoItem('TINDER', const TinderDemoPage()),
       _DemoItem('CUSTOM', const ExampleCustomPage()),
@@ -135,13 +138,34 @@ class ThreeDDemoPage extends StatefulWidget {
   State<ThreeDDemoPage> createState() => _ThreeDDemoPageState();
 }
 
+const _styleHints = <Swiper3DStyle, String>{
+  Swiper3DStyle.cube: 'Cube faces rotate in place',
+  Swiper3DStyle.threeD: 'Center rotate and recede',
+  Swiper3DStyle.flip: 'Card flips 180°',
+  Swiper3DStyle.coverflow: 'Cover-flow row (viewport 0.75)',
+  Swiper3DStyle.carousel: '3D cylinder (viewport 0.7)',
+  Swiper3DStyle.cards: 'Stacked cards fly off',
+  Swiper3DStyle.rotate: 'Rotary swing from the bottom',
+};
+
 class _ThreeDDemoPageState extends State<ThreeDDemoPage> {
   bool enable3D = true;
   Swiper3DStyle style = Swiper3DStyle.cube;
 
+  double get _viewportFraction {
+    if (!enable3D) return 1.0;
+    switch (style) {
+      case Swiper3DStyle.coverflow:
+        return 0.75;
+      case Swiper3DStyle.carousel:
+        return 0.7;
+      default:
+        return 1.0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final coverflow = style == Swiper3DStyle.coverflow && enable3D;
     return Scaffold(
       appBar: AppBar(title: const Text('3D switch')),
       body: Column(
@@ -153,6 +177,7 @@ class _ThreeDDemoPageState extends State<ThreeDDemoPage> {
           ),
           ListTile(
             title: const Text('threeDStyle'),
+            subtitle: Text(_styleHints[style] ?? style.name),
             trailing: DropdownButton<Swiper3DStyle>(
               value: style,
               onChanged: enable3D
@@ -176,7 +201,7 @@ class _ThreeDDemoPageState extends State<ThreeDDemoPage> {
               itemCount: _colors.length,
               enable3D: enable3D,
               threeDStyle: style,
-              viewportFraction: coverflow ? 0.75 : 1.0,
+              viewportFraction: _viewportFraction,
               pagination: const SwiperPagination(),
               control: const SwiperControl(),
             ),
@@ -313,6 +338,119 @@ class PluginDemoPage extends StatelessWidget {
           builder: SwiperPagination.fraction,
         ),
         control: const SwiperControl(),
+      ),
+    );
+  }
+}
+
+class MultiCardDemoPage extends StatelessWidget {
+  const MultiCardDemoPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Multi-card')),
+      body: Swiper(
+        itemBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: _colorCard(index, radius: BorderRadius.circular(12)),
+        ),
+        itemCount: _colors.length,
+        slidesPerView: 2.5,
+        spaceBetween: 12,
+        pagination: const SwiperPagination(),
+        control: const SwiperControl(),
+      ),
+    );
+  }
+}
+
+class RtlDemoPage extends StatelessWidget {
+  const RtlDemoPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('RTL')),
+        body: Swiper(
+          itemBuilder: (context, index) => _colorCard(index),
+          itemCount: _colors.length,
+          pagination: const SwiperPagination(),
+          control: const SwiperControl(),
+        ),
+      ),
+    );
+  }
+}
+
+class PlaybackDemoPage extends StatefulWidget {
+  const PlaybackDemoPage({super.key});
+
+  @override
+  State<PlaybackDemoPage> createState() => _PlaybackDemoPageState();
+}
+
+class _PlaybackDemoPageState extends State<PlaybackDemoPage> {
+  final playing = ValueNotifier(false);
+  int active = 0;
+
+  @override
+  void dispose() {
+    playing.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Playback hooks')),
+      body: Column(
+        children: [
+          SwitchListTile(
+            title: const Text('playing (pauses autoplay)'),
+            value: playing.value,
+            onChanged: (value) => setState(() => playing.value = value),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text('active page: $active  isActive via SwiperItemScope'),
+          ),
+          Expanded(
+            child: Swiper(
+              autoplay: true,
+              itemCount: _colors.length,
+              pagination: const SwiperPagination(),
+              control: const SwiperControl(),
+              playback: SwiperPlaybackConfig(
+                playing: playing,
+                onActiveChanged: (index, isActive) {
+                  if (isActive) setState(() => active = index);
+                },
+              ),
+              itemBuilder: (context, index) {
+                final scope = SwiperItemScope.of(context);
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _colorCard(index),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          scope.isActive ? 'active (host would play)' : 'paused',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

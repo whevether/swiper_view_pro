@@ -1,13 +1,10 @@
 ![Logo](banner.jpg)
 
 <p align="center">
-    <a href="https://travis-ci.org/feicien/flutter_swiper_view">
-        <img src="https://travis-ci.org/feicien/flutter_swiper_view.svg?branch=master" alt="Build Status" />
+    <a href="https://github.com/whevether/swiper_view_pro">
+        <img src="https://img.shields.io/badge/GitHub-swiper__view__pro-blue.svg" alt="GitHub" />
     </a>
-    <a href="https://coveralls.io/github/feicien/flutter_swiper_view?branch=master">
-        <img src="https://coveralls.io/repos/github/feicien/flutter_swiper_view/badge.svg?branch=master" alt="Coverage Status" />
-    </a>
-    <a href="https://github.com/whevether/flutter_swiper_view/pulls">
+    <a href="https://github.com/whevether/swiper_view_pro/pulls">
         <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg" alt="PRs Welcome" />
     </a>
     <a href="https://pub.dev/packages/swiper_view_pro">
@@ -15,7 +12,7 @@
     </a>
 </p>
 <p align="center">
-    <a href="https://github.com/whevether/flutter_swiper_view/blob/master/README-ZH.md">
+    <a href="https://github.com/whevether/swiper_view_pro/blob/main/README-ZH.md">
         <b>中文说明</b>
     </a>
 </p>
@@ -50,15 +47,15 @@ Thanks to @FlutterRocks ,you've done great job 👏.
 
 # Showcases
 
-![Horizontal](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/1.gif)
+![Horizontal](https://github.com/whevether/swiper_view_pro/raw/main/example/res/1.gif)
 
-![Vertical](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/2.gif)
+![Vertical](https://github.com/whevether/swiper_view_pro/raw/main/example/res/2.gif)
 
-![Custom Pagination](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/3.gif)
+![Custom Pagination](https://github.com/whevether/swiper_view_pro/raw/main/example/res/3.gif)
 
-![Custom Pagination](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/4.gif)
+![Custom Pagination](https://github.com/whevether/swiper_view_pro/raw/main/example/res/4.gif)
 
-![Phone](https://github.com/whevether/flutter_swiper_view/raw/master/example/res/5.gif)
+![Phone](https://github.com/whevether/swiper_view_pro/raw/main/example/res/5.gif)
 
 ![Example](https://github.com/jzoom/images/raw/master/swiper-example.gif)
 
@@ -67,7 +64,7 @@ Thanks to @FlutterRocks ,you've done great job 👏.
 
 ## Changelogs
 
->see:[CHANGELOG.md](https://github.com/whevether/flutter_swiper_view/blob/master/CHANGELOG.md)
+>see:[CHANGELOG.md](https://github.com/whevether/swiper_view_pro/blob/main/CHANGELOG.md)
 
 ## Getting Started
 
@@ -80,6 +77,8 @@ Thanks to @FlutterRocks ,you've done great job 👏.
   + [Controller](#controller)
   + [Autoplay](#autoplay)
 - [3D effects](#3d-effects)
+- [Multi-card](#multi-card)
+- [Video / media](#video--media)
 - [Build in layouts](#build-in-layouts)
 - [Codes](#codes)
 
@@ -171,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
 | :------------ |:---------------:| :-----|
 | scrollDirection | Axis.horizontal  | If `Axis.horizontal`, the scroll view's children are arranged horizontally in a row instead of vertically in a column. |
 | loop | true |Set to `false` to disable continuous loop mode. |
-| index | 0 |  Index number of initial slide. |
+| index | null | Initial index. `null` means uncontrolled (Swiper manages index). |
 | autoplay | false |Set to `true` enable auto play mode. |
 | onIndexChanged | void onIndexChanged(int index)  | Called with the new index when the user swiped or autoplay |
 | onTap | void onTap(int index)  | Called when user tap ui. |
@@ -179,8 +178,14 @@ class _MyHomePageState extends State<MyHomePage> {
 | pagination | null | set `SwiperPagination()` to show default pagination
 | control | null | set `SwiperControl()` to show default control buttons
 | enable3D | false | 3D effect switch. Only applies to `SwiperLayout.DEFAULT` when `transformer` is null. |
-| threeDStyle | Swiper3DStyle.cube | 3D style when `enable3D` is true: `cube`, `threeD`, `flip`, `coverflow`. |
+| threeDStyle | Swiper3DStyle.cube | 3D style when `enable3D` is true: `cube`, `threeD`, `flip`, `coverflow`, `carousel`, `cards`, `rotate`. |
 | perspective | 0.001 | Perspective strength for 3D transforms. |
+| slidesPerView | 1 | Visible slides (fractions allowed, e.g. `2.5`). DEFAULT only. An explicit `viewportFraction` other than 1 wins. |
+| spaceBetween | 0 | Gap between slides. DEFAULT only. |
+| pageSnapping | true | Page snapping. DEFAULT only. |
+| enableKeyboard | true | Arrow keys change slides when focused. |
+| reverse | null | When set, overrides automatic RTL. |
+| playback | null | Host media hooks. See Video / media below. |
 
 
 #### Pagination
@@ -259,18 +264,30 @@ Swiper(
   },
   itemCount: 5,
   enable3D: true,
-  threeDStyle: Swiper3DStyle.cube, // cube, threeD, flip, coverflow
+  threeDStyle: Swiper3DStyle.cube, // cube, threeD, flip, coverflow, carousel, cards, rotate
   pagination: const SwiperPagination(),
 )
 ```
 
-Coverflow looks best with a smaller viewport:
+Built-in 3D styles:
+
+| Style | Look |
+|-------|------|
+| `cube` | Cube faces rotate in place around the shared edge |
+| `threeD` | Page rotates from its center and recedes in Z |
+| `flip` | Card flips 180° |
+| `coverflow` | Neighbors rotate and scale in a row |
+| `carousel` | Pages sit on a 3D cylinder |
+| `cards` | Stacked cards; the top card flies off |
+| `rotate` | Pages swing around the bottom edge |
+
+`coverflow` and `carousel` look best with a smaller viewport:
 
 ```dart
 Swiper(
   itemBuilder: (context, index) { /* ... */ },
   itemCount: 5,
-  viewportFraction: 0.75,
+  viewportFraction: 0.75, // 0.7 for carousel
   enable3D: true,
   threeDStyle: Swiper3DStyle.coverflow,
 )
@@ -287,6 +304,45 @@ Swiper(
 ```
 
 See the example app for a live switch and style picker.
+
+## Multi-card
+
+`SwiperLayout.DEFAULT` only. `slidesPerView` accepts fractions. An explicit `viewportFraction` other than 1 wins.
+
+```dart
+Swiper(
+  itemBuilder: (context, index) { /* ... */ },
+  itemCount: 8,
+  slidesPerView: 2.5,
+  spaceBetween: 12,
+)
+```
+
+Horizontal swipers follow `Directionality` for RTL. Arrow keys change slides when focused (`enableKeyboard`, on by default).
+
+## Video / media
+
+This package does **not** ship a video widget and has no `video_player` dependency. Put your own player in `itemBuilder` and wire lifecycle with `playback` plus `SwiperItemScope`.
+
+```dart
+Swiper(
+  itemCount: videos.length,
+  playback: SwiperPlaybackConfig(
+    playing: isPlaying, // ValueNotifier<bool>; true pauses swiper autoplay
+    onActiveChanged: (index, active) {
+      if (active) {
+        players[index].play();
+      } else {
+        players[index].pause();
+      }
+    },
+  ),
+  itemBuilder: (context, index) {
+    final active = SwiperItemScope.of(context).isActive;
+    return YourVideoPlayer(url: videos[index], play: active);
+  },
+)
+```
 
 ## Build in layouts
 ![](https://github.com/jzoom/images/raw/master/layout1.gif)
@@ -432,7 +488,7 @@ ConstrainedBox(
 
 You can find all custom options here:
 
->https://github.com/whevether/flutter_swiper_view/blob/master/example/lib/src/example_custom.dart
+>https://github.com/whevether/swiper_view_pro/blob/main/example/lib/src/example_custom.dart
 
 
 
