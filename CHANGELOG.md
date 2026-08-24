@@ -1,3 +1,9 @@
+## [0.2.0] - [2026/08/24]
+
+    * Migrate to standalone `material_ui ^1.0.1`
+    * Replace all `package:flutter/material.dart` imports with `package:material_ui/material_ui.dart`
+    * Raise minimum SDK requirements to Dart 3.12 and Flutter 3.44+
+
 ## [0.1.0] - [2026/08/13]
 
     * Rename package to `swiper_view_pro`

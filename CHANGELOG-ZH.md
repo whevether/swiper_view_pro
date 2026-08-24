@@ -1,3 +1,9 @@
+## [0.2.0] - [2026/08/24]
+
+    * 迁移到独立包 `material_ui ^1.0.1`
+    * 全部 `package:flutter/material.dart` import 改为 `package:material_ui/material_ui.dart`
+    * 最低环境要求提升至 Dart 3.12 与 Flutter 3.44+
+
 ## [0.1.0] - [2026/08/13]
 
     * 包名改为 `swiper_view_pro`

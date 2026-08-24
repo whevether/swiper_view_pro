@@ -126,7 +126,7 @@ flutter create myapp
 编辑 lib/main.dart:
 
 ```dart
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:swiper_view_pro/swiper_view_pro.dart';
 

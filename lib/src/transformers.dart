@@ -458,17 +458,15 @@ class ScaleAndFadeTransformer extends PageTransformer {
   final double? _scale;
   final double? _fade;
 
-  ScaleAndFadeTransformer({double? fade = 0.3, double? scale = 0.8})
-      : _fade = fade,
-        _scale = scale;
+  ScaleAndFadeTransformer({this._fade = 0.3, this._scale = 0.8});
 
   @override
   Widget transform(Widget child, TransformInfo info) {
     final position = _position(info);
     Widget newChild = child;
     if (_scale != null) {
-      final scaleFactor = (1 - position.abs()) * (1 - _scale!);
-      final scale = _scale! + scaleFactor;
+      final scaleFactor = (1 - position.abs()) * (1 - _scale);
+      final scale = _scale + scaleFactor;
       newChild = Transform.scale(
         scale: scale,
         child: child,
@@ -476,8 +474,8 @@ class ScaleAndFadeTransformer extends PageTransformer {
     }
 
     if (_fade != null) {
-      final fadeFactor = (1 - position.abs()) * (1 - _fade!);
-      final opacity = (_fade! + fadeFactor).clamp(0.0, 1.0);
+      final fadeFactor = (1 - position.abs()) * (1 - _fade);
+      final opacity = (_fade + fadeFactor).clamp(0.0, 1.0);
       newChild = Opacity(
         opacity: opacity,
         child: newChild,

@@ -108,7 +108,7 @@ flutter create myapp
 Edit lib/main.dart like this:
 
 ```dart
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:swiper_view_pro/swiper_view_pro.dart';
 
