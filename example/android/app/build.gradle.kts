@@ -32,7 +32,11 @@ android {
             useLegacyPackaging = true
         }
     }
-
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
     defaultConfig {
         applicationId = "com.whevether.swiper_view_pro_example"
         minSdk = 24
@@ -73,11 +77,6 @@ android {
     }
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_17
-    }
-}
 
 flutter {
     source = "../.."
