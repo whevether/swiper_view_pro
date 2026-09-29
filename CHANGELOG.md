@@ -1,3 +1,8 @@
+## [0.3.0] - [2026/09/28]
+
+    * Bump `material_ui` to `^1.4.0`
+    * Raise minimum SDK requirements to Dart 3.13 and Flutter 3.47+
+
 ## [0.2.0] - [2026/08/24]
 
     * Migrate to standalone `material_ui ^1.0.1`
