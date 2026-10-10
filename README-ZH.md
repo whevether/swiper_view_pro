@@ -106,7 +106,7 @@ Flutter swiper/carousel，多种布局、无限轮播、可配置 3D 效果，�
 
 ```dart
 dependencies:
-  swiper_view_pro: ^0.1.0
+  swiper_view_pro: ^0.3.1
 ```
 到项目根目录下的 pubspec.yaml ,并且根目录运行命令行 
 

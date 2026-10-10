@@ -1,3 +1,8 @@
+## [0.3.1] - [2026/10/10]
+
+    * Bump `material_ui` to `^1.6.0`
+    * Example Android: AGP `9.4.2`, Kotlin `2.4.21`, Gradle `9.8.0`
+
 ## [0.3.0] - [2026/09/28]
 
     * Bump `material_ui` to `^1.4.0`
