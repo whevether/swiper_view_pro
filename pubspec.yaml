@@ -1,13 +1,13 @@
 name: swiper_view_pro
 description: A Flutter swiper/carousel with multiple layouts, infinite loop, and configurable 3D effects. Compatible with Android and iOS.
-version: 0.3.1
+version: 0.3.2
 homepage: https://github.com/whevether/swiper_view_pro
 repository: https://github.com/whevether/swiper_view_pro
 
 dependencies:
   flutter:
     sdk: flutter
-  material_ui: ^1.6.0
+  material_ui: ^1.7.0
 
 environment:
   sdk: '>=3.13.0 <4.0.0'

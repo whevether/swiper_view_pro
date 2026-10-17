@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import 'transformer_page_view.dart';
 
+@Deprecated('Unused legacy callback; use CustomPainter instead.')
 typedef PaintCallback = void Function(Canvas canvas, Size size);
 
 class ColorPainter extends CustomPainter {
@@ -10,70 +12,35 @@ class ColorPainter extends CustomPainter {
   final List<Color> colors;
 
   ColorPainter(this._paint, this.info, this.colors);
-  // conver color
-  int colorToInt(Color color) {
-    final a = (color.a * 255).round();
-    final r = (color.r * 255).round();
-    final g = (color.g * 255).round();
-    final b = (color.b * 255).round();
+  @Deprecated('Use Color.toARGB32 instead.')
+  int colorToInt(Color color) => color.toARGB32();
 
-    // Combine the components into a single int using bit shifting
-    return (a << 24) | (r << 16) | (g << 8) | b;
-  }
   @override
   void paint(Canvas canvas, Size size) {
-    int index = info.fromIndex;
+    if (colors.isEmpty) return;
+    final index = info.fromIndex % colors.length;
+    final rect = Offset.zero & size;
     _paint.color = colors[index];
-    canvas.drawRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height), _paint);
-    if (info.done!) {
-      return;
-    }
-    int alpha;
-    int color;
-    double opacity;
-    double? position = info.position;
-    if (info.forward!) {
-      if (index < colors.length - 1) {
-        color = colorToInt(colors[index + 1]) & 0x00ffffff;
-        opacity = (position! <= 0
-            ? (-position / info.viewportFraction!)
-            : 1 - position / info.viewportFraction!);
-        if (opacity > 1) {
-          opacity -= 1.0;
-        }
-        if (opacity < 0) {
-          opacity += 1.0;
-        }
-        alpha = (0xff * opacity).toInt();
-
-        _paint.color = Color((alpha << 24) | color);
-        canvas.drawRect(
-            Rect.fromLTWH(0.0, 0.0, size.width, size.height), _paint);
-      }
-    } else {
-      if (index > 0) {
-        color = colorToInt(colors[index - 1]) & 0x00ffffff;
-        opacity = (position! > 0
-            ? position / info.viewportFraction!
-            : (1 + position / info.viewportFraction!));
-        if (opacity > 1) {
-          opacity -= 1.0;
-        }
-        if (opacity < 0) {
-          opacity += 1.0;
-        }
-        alpha = (0xff * opacity).toInt();
-
-        _paint.color = Color((alpha << 24) | color);
-        canvas.drawRect(
-            Rect.fromLTWH(0.0, 0.0, size.width, size.height), _paint);
-      }
-    }
+    canvas.drawRect(rect, _paint);
+    if (info.done ?? true) return;
+    final forward = info.forward ?? true;
+    final adjacent = index + (forward ? 1 : -1);
+    if (!info.loop && (adjacent < 0 || adjacent >= colors.length)) return;
+    final fraction = info.viewportFraction ?? 1;
+    if (fraction <= 0) return;
+    final position = (info.position ?? 0) / fraction;
+    final opacity = forward
+        ? (position <= 0 ? -position : 1 - position)
+        : (position > 0 ? position : 1 + position);
+    _paint.color = colors[adjacent % colors.length].withValues(
+      alpha: opacity.clamp(0.0, 1.0),
+    );
+    canvas.drawRect(rect, _paint);
   }
 
   @override
   bool shouldRepaint(ColorPainter oldDelegate) {
-    return oldDelegate.info != info;
+    return oldDelegate.info != info || !listEquals(oldDelegate.colors, colors);
   }
 }
 
@@ -144,14 +111,11 @@ class ParallaxImage extends StatelessWidget {
     super.key,
     required double position,
     this.imageFactor = 0.3,
-  })  : image = Image.asset(
-          name,
-          fit: BoxFit.cover,
-          alignment: FractionalOffset(
-            0.5 + position * imageFactor,
-            0.5,
-          ),
-        );
+  }) : image = Image.asset(
+         name,
+         fit: BoxFit.cover,
+         alignment: FractionalOffset(0.5 + position * imageFactor, 0.5),
+       );
 
   @override
   Widget build(BuildContext context) {

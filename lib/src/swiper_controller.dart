@@ -1,18 +1,14 @@
 import 'package:swiper_view_pro/swiper_view_pro.dart';
 
+@Deprecated('Legacy event; use IndexController.move instead.')
 class SwipeIndexControllerEvent extends IndexControllerEventBase {
-  SwipeIndexControllerEvent({
-    required this.pos,
-    required super.animation,
-  });
+  SwipeIndexControllerEvent({required this.pos, required super.animation});
   final double pos;
 }
 
+@Deprecated('Legacy event; build plugins with SwiperPluginConfig instead.')
 class BuildIndexControllerEvent extends IndexControllerEventBase {
-  BuildIndexControllerEvent({
-    required super.animation,
-    required this.config,
-  });
+  BuildIndexControllerEvent({required super.animation, required this.config});
   final SwiperPluginConfig config;
 }
 
@@ -22,12 +18,10 @@ class AutoPlaySwiperControllerEvent extends IndexControllerEventBase {
     required this.autoplay,
   });
 
-  AutoPlaySwiperControllerEvent.start({
-    required bool animation,
-  }) : this(animation: animation, autoplay: true);
-  AutoPlaySwiperControllerEvent.stop({
-    required bool animation,
-  }) : this(animation: animation, autoplay: false);
+  AutoPlaySwiperControllerEvent.start({required bool animation})
+    : this(animation: animation, autoplay: true);
+  AutoPlaySwiperControllerEvent.stop({required bool animation})
+    : this(animation: animation, autoplay: false);
   final bool autoplay;
 }
 

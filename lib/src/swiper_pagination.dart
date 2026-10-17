@@ -51,7 +51,7 @@ class FractionPaginationBuilder extends SwiperPlugin {
           Text(
             "$itemCount",
             style: TextStyle(color: color, fontSize: fontSize),
-          )
+          ),
         ],
       );
     } else {
@@ -66,7 +66,7 @@ class FractionPaginationBuilder extends SwiperPlugin {
           Text(
             " / $itemCount",
             style: TextStyle(color: color, fontSize: fontSize),
-          )
+          ),
         ],
       );
     }
@@ -116,39 +116,34 @@ class RectSwiperPaginationBuilder extends SwiperPlugin {
     int activeIndex = config.activeIndex;
     if (itemCount > 20) {
       debugPrint(
-          "The itemCount is too big, we suggest use FractionPaginationBuilder instead of RectSwiperPaginationBuilder in this situation");
+        "The itemCount is too big, we suggest use FractionPaginationBuilder instead of RectSwiperPaginationBuilder in this situation",
+      );
     }
 
     for (int i = 0; i < itemCount; ++i) {
       bool active = i == activeIndex;
       Size size = active ? activeSize : this.size;
-      list.add(GestureDetector(
-        onTap: () => config.controller.move(i),
-        child: Container(
-          width: size.width,
-          height: size.height,
-          key: Key("pagination_$i"),
-          margin: EdgeInsets.all(space),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(1.5),
-            color: active ? activeColor : color,
+      list.add(
+        GestureDetector(
+          onTap: () => config.controller.move(i),
+          child: Container(
+            width: size.width,
+            height: size.height,
+            key: Key("pagination_$i"),
+            margin: EdgeInsets.all(space),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(1.5),
+              color: active ? activeColor : color,
+            ),
           ),
         ),
-      ));
+      );
     }
 
     if (config.scrollDirection == Axis.vertical) {
-      return Column(
-        key: key,
-        mainAxisSize: MainAxisSize.min,
-        children: list,
-      );
+      return Column(key: key, mainAxisSize: MainAxisSize.min, children: list);
     } else {
-      return Row(
-        key: key,
-        mainAxisSize: MainAxisSize.min,
-        children: list,
-      );
+      return Row(key: key, mainAxisSize: MainAxisSize.min, children: list);
     }
   }
 }
@@ -182,7 +177,6 @@ class DotSwiperPaginationBuilder extends SwiperPlugin {
 
   @override
   Widget build(BuildContext context, SwiperPluginConfig config) {
-
     int itemCount = config.itemCount;
     if (itemCount <= 1) {
       return Container();
@@ -190,7 +184,8 @@ class DotSwiperPaginationBuilder extends SwiperPlugin {
 
     if (config.itemCount > 20) {
       debugPrint(
-          "The itemCount is too big, we suggest use FractionPaginationBuilder instead of DotSwiperPaginationBuilder in this sitituation");
+        "The itemCount is too big, we suggest use FractionPaginationBuilder instead of DotSwiperPaginationBuilder in this sitituation",
+      );
     }
     Color? activeColor = this.activeColor;
     Color? color = this.color;
@@ -208,6 +203,7 @@ class DotSwiperPaginationBuilder extends SwiperPlugin {
         controller: config.pageController!,
         layout: config.indicatorLayout,
         size: size,
+        activeSize: activeSize,
         activeColor: activeColor,
         color: color,
         space: space,
@@ -221,40 +217,36 @@ class DotSwiperPaginationBuilder extends SwiperPlugin {
 
     for (int i = 0; i < itemCount; ++i) {
       bool active = i == activeIndex;
-      list.add(GestureDetector(
-        onTap: () => config.controller.move(i),
-        child: Container(
-          key: Key("pagination_$i"),
-          margin: EdgeInsets.all(space),
-          child: ClipOval(
-            child: Container(
-              color: active ? activeColor : color,
-              width: active ? activeSize : size,
-              height: active ? activeSize : size,
+      list.add(
+        GestureDetector(
+          onTap: () => config.controller.move(i),
+          child: Container(
+            key: Key("pagination_$i"),
+            margin: EdgeInsets.all(space),
+            child: ClipOval(
+              child: Container(
+                color: active ? activeColor : color,
+                width: active ? activeSize : size,
+                height: active ? activeSize : size,
+              ),
             ),
           ),
         ),
-      ));
+      );
     }
 
     if (config.scrollDirection == Axis.vertical) {
-      return Column(
-        key: key,
-        mainAxisSize: MainAxisSize.min,
-        children: list,
-      );
+      return Column(key: key, mainAxisSize: MainAxisSize.min, children: list);
     } else {
-      return Row(
-        key: key,
-        mainAxisSize: MainAxisSize.min,
-        children: list,
-      );
+      return Row(key: key, mainAxisSize: MainAxisSize.min, children: list);
     }
   }
 }
 
 typedef SwiperPaginationBuilder = Widget Function(
-    BuildContext context, SwiperPluginConfig config);
+  BuildContext context,
+  SwiperPluginConfig config,
+);
 
 class SwiperCustomPagination extends SwiperPlugin {
   final SwiperPaginationBuilder builder;

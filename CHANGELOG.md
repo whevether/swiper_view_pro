@@ -1,3 +1,15 @@
+## [0.3.2] - [2026/10/17]
+
+- Fix custom-layout controller completion, command queuing, animation disabling, controlled indices, empty data, and non-loop boundaries.
+- Fix looping parallax indices, reversed pagination initialization, pagination repainting, and custom scale alignment.
+- Preserve manual autoplay stops and allow focused input controls inside the swiper.
+- Honor standalone page-view viewport fractions; preserve page position on rebuild and dispose internally owned controllers.
+- Reuse page content during animation, avoid repeated plugin-list copies, and share loop constants, index conversion, and interpolation helpers.
+- Implement animated pagination `activeSize`; preserve fractional animation across loop boundaries.
+- Deprecate unused legacy events and callbacks while retaining source compatibility.
+- Upgrade `material_ui` to `^1.7.0` and Gradle to `9.8.1`; correct the example AGP version to the available stable `9.4.1`.
+- Add regression coverage for controller lifecycle, focus, autoplay, layout updates, animation reuse, and pagination rendering.
+
 ## [0.3.1] - [2026/10/10]
 
     * Bump `material_ui` to `^1.6.0`
