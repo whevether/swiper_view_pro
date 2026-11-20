@@ -49,12 +49,15 @@ android {
         }
     }
 
+    val hasReleaseKeystore = keystorePropertiesFile.exists()
     signingConfigs {
-        create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
-            storePassword = keystoreProperties["storePassword"] as String
+        if (hasReleaseKeystore) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
+                storePassword = keystoreProperties["storePassword"] as String
+            }
         }
     }
 
@@ -66,7 +69,10 @@ android {
             ndk {
                 debugSymbolLevel = "NONE"
             }
-            signingConfig = signingConfigs.getByName("release")
+            // Falls back to debug signing when key.properties is absent.
+            signingConfig = signingConfigs.getByName(
+                if (hasReleaseKeystore) "release" else "debug",
+            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

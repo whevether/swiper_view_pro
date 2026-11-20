@@ -1,3 +1,12 @@
+## [0.3.3] - [2026/11/20]
+
+- 升级 `material_ui` 到 `^1.11.1`，Gradle 到 `9.9.2`。
+- 新增 `emptyBuilder`、`onScroll`、`semanticLabel`（含增减语义动作）与 `pauseAutoplayInBackground`。
+- 新增 `keyboardAutofocus`（默认 `false`），不再自动抢占焦点；需要旧行为请设为 `true`。
+- 修复 TINDER 旋转角度单位；STACK/TINDER/CUSTOM 缺少当前滚动方向所需的 item 尺寸时抛出明确的 `FlutterError`。
+- 示例 Android：缺少 `key.properties` 时 release 回退为 debug 签名。
+- 标注 `flutter_swiper_view.dart` 为已弃用的旧入口，并移除过期的 IDE 模块文件。
+
 ## [0.3.2] - [2026/10/17]
 
 - 修复自定义布局控制器 Future 未完成、连续命令丢失、禁用动画失效、受控索引不同步、空数据异常及非循环边界问题。

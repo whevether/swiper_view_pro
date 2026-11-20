@@ -17,9 +17,12 @@ abstract class _CustomLayoutStateBase<T extends _SubSwiper> extends State<T>
   @override
   void initState() {
     _currentIndex = _ensureIndex(widget.index ?? 0);
-    if (widget.itemWidth == null) {
-      throw Exception(
-        '==============\n\nwidget.itemWidth must not be null when use stack layout.\n========\n',
+    final vertical = widget.scrollDirection == Axis.vertical;
+    if (vertical ? widget.itemHeight == null : widget.itemWidth == null) {
+      throw FlutterError(
+        'Swiper: ${vertical ? 'itemHeight' : 'itemWidth'} must not be null '
+        'for STACK, TINDER and CUSTOM layouts when scrollDirection is '
+        '${vertical ? 'vertical' : 'horizontal'}.',
       );
     }
 

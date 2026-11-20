@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -152,6 +153,23 @@ class Swiper extends StatefulWidget {
   /// Host-owned media hooks. This package does not embed a video widget.
   final SwiperPlaybackConfig? playback;
 
+  /// Built in place of the swiper when [itemCount] is 0.
+  final WidgetBuilder? emptyBuilder;
+
+  /// Called with the fractional logical page while the user scrolls
+  /// (only [SwiperLayout.DEFAULT]).
+  final ValueChanged<double>? onScroll;
+
+  /// Pause autoplay while the app is not in the foreground.
+  final bool pauseAutoplayInBackground;
+
+  /// Accessibility label announced for the swiper container.
+  final String? semanticLabel;
+
+  /// Request keyboard focus automatically so arrow keys work immediately.
+  /// Defaults to false to avoid stealing focus from form fields.
+  final bool keyboardAutofocus;
+
   const Swiper({
     this.itemBuilder,
     this.indicatorLayout = PageIndicatorLayout.NONE,
@@ -194,6 +212,11 @@ class Swiper extends StatefulWidget {
     this.enableKeyboard = true,
     this.reverse,
     this.playback,
+    this.emptyBuilder,
+    this.onScroll,
+    this.pauseAutoplayInBackground = true,
+    this.semanticLabel,
+    this.keyboardAutofocus = false,
   }) : assert(
          itemBuilder != null || transformer != null,
          'itemBuilder and transformer must not be both null',
@@ -257,7 +280,17 @@ class Swiper extends StatefulWidget {
     bool enableKeyboard = true,
     bool? reverse,
     SwiperPlaybackConfig? playback,
+    WidgetBuilder? emptyBuilder,
+    ValueChanged<double>? onScroll,
+    bool pauseAutoplayInBackground = true,
+    String? semanticLabel,
+    bool keyboardAutofocus = false,
   }) => Swiper(
+    emptyBuilder: emptyBuilder,
+    onScroll: onScroll,
+    pauseAutoplayInBackground: pauseAutoplayInBackground,
+    semanticLabel: semanticLabel,
+    keyboardAutofocus: keyboardAutofocus,
     fade: fade,
     indicatorLayout: indicatorLayout,
     layout: layout,
@@ -345,7 +378,17 @@ class Swiper extends StatefulWidget {
     double spaceBetween = 0,
     bool enableKeyboard = true,
     SwiperPlaybackConfig? playback,
+    WidgetBuilder? emptyBuilder,
+    ValueChanged<double>? onScroll,
+    bool pauseAutoplayInBackground = true,
+    String? semanticLabel,
+    bool keyboardAutofocus = false,
   }) => Swiper(
+    emptyBuilder: emptyBuilder,
+    onScroll: onScroll,
+    pauseAutoplayInBackground: pauseAutoplayInBackground,
+    semanticLabel: semanticLabel,
+    keyboardAutofocus: keyboardAutofocus,
     fade: fade,
     indicatorLayout: indicatorLayout,
     layout: layout,
@@ -413,10 +456,25 @@ class Swiper extends StatefulWidget {
   State<StatefulWidget> createState() => _SwiperState();
 }
 
-abstract class _SwiperTimerMixin extends State<Swiper> {
+abstract class _SwiperTimerMixin extends State<Swiper>
+    with WidgetsBindingObserver {
   Timer? _timer;
   bool _autoplayRequested = false;
   bool _interactionPaused = false;
+  bool _backgroundPaused = false;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!widget.pauseAutoplayInBackground) return;
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _backgroundPaused = true;
+      _stopAutoplay();
+    } else if (state == AppLifecycleState.resumed && _backgroundPaused) {
+      _backgroundPaused = false;
+      _startAutoplay();
+    }
+  }
   late bool _ownsController;
 
   late SwiperController _controller;
@@ -424,6 +482,7 @@ abstract class _SwiperTimerMixin extends State<Swiper> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _ownsController = widget.controller == null;
     _controller = widget.controller ?? SwiperController();
     _controller.addListener(_onController);
@@ -464,6 +523,7 @@ abstract class _SwiperTimerMixin extends State<Swiper> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.removeListener(_onController);
     if (_ownsController) _controller.dispose();
     _stopAutoplay();
@@ -482,6 +542,7 @@ abstract class _SwiperTimerMixin extends State<Swiper> {
     _stopAutoplay();
     if (!_autoplayRequested ||
         _interactionPaused ||
+        _backgroundPaused ||
         widget.itemCount <= 1 ||
         _shouldPauseForPlayback()) {
       return;
@@ -711,9 +772,18 @@ class _SwiperState extends _SwiperTimerMixin {
         allowImplicitScrolling: widget.allowImplicitScrolling,
         pageSnapping: widget.pageSnapping,
       );
-      if (widget.autoplayDisableOnInteraction && widget.autoplay) {
+      final pauseOnDrag =
+          widget.autoplayDisableOnInteraction && widget.autoplay;
+      if (pauseOnDrag || widget.onScroll != null) {
         return NotificationListener(
           onNotification: (notification) {
+            if (notification is ScrollUpdateNotification &&
+                notification.depth == 0 &&
+                widget.onScroll != null) {
+              final page = _pageController?.page;
+              if (page != null) widget.onScroll!(page);
+            }
+            if (!pauseOnDrag) return false;
             if (notification is ScrollStartNotification) {
               if (notification.dragDetails != null) {
                 _pauseForInteraction();
@@ -817,7 +887,7 @@ class _SwiperState extends _SwiperTimerMixin {
           },
         },
       },
-      child: Focus(autofocus: true, child: child),
+      child: Focus(autofocus: widget.keyboardAutofocus, child: child),
     );
   }
 
@@ -834,6 +904,23 @@ class _SwiperState extends _SwiperTimerMixin {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.itemCount == 0 && widget.emptyBuilder != null) {
+      return widget.emptyBuilder!(context);
+    }
+    final count = widget.itemCount;
+    return Semantics(
+      container: true,
+      label: widget.semanticLabel,
+      value: count > 0 ? '${_activeIndex + 1} / $count' : null,
+      increasedValue: count > 0 ? '${normalizeSwiperIndex(_activeIndex + 1, count, widget.loop) + 1} / $count' : null,
+      decreasedValue: count > 0 ? '${normalizeSwiperIndex(_activeIndex - 1, count, widget.loop) + 1} / $count' : null,
+      onIncrease: count > 1 ? () => _controller.next() : null,
+      onDecrease: count > 1 ? () => _controller.previous() : null,
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     Widget swiper = _buildSwiper();
     final listForStack = <Widget>[swiper];
     SwiperPluginConfig? config;
@@ -1074,7 +1161,7 @@ class _TinderState extends _CustomLayoutStateBase<_TinderSwiper> {
     return Opacity(
       opacity: o,
       child: Transform.rotate(
-        angle: a / 180.0,
+        angle: a * math.pi / 180.0,
         child: Transform.translate(
           key: ValueKey<int>(_currentIndex + i),
           offset: Offset(f, fy),

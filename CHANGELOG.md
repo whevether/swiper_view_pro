@@ -1,3 +1,12 @@
+## [0.3.3] - [2026/11/20]
+
+- Upgrade `material_ui` to `^1.11.1` and Gradle to `9.9.2`.
+- Add `emptyBuilder`, `onScroll`, `semanticLabel` (with increase/decrease semantic actions), and `pauseAutoplayInBackground`.
+- Add `keyboardAutofocus` (default `false`); the swiper no longer steals focus automatically. Set it to `true` for the previous behavior.
+- Fix TINDER rotation to use real degrees; STACK/TINDER/CUSTOM now throw a clear `FlutterError` when the required item size for the scroll axis is missing.
+- Example Android: release signing falls back to debug when `key.properties` is absent.
+- Mark `flutter_swiper_view.dart` as a deprecated legacy entry and remove the stale IDE module file.
+
 ## [0.3.2] - [2026/10/17]
 
 - Fix custom-layout controller completion, command queuing, animation disabling, controlled indices, empty data, and non-loop boundaries.

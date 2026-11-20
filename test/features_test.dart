@@ -94,6 +94,7 @@ void main() {
       home: Swiper(
         controller: controller,
         loop: false,
+        keyboardAutofocus: true,
         itemBuilder: _item,
         itemCount: 5,
       ),

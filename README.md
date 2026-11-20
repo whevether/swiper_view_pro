@@ -88,7 +88,7 @@ Add
 
 ```dart
 dependencies:
-  swiper_view_pro: ^0.3.2
+  swiper_view_pro: ^0.3.3
 ```
 to your pubspec.yaml ,and run 
 
